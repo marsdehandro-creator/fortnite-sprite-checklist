@@ -66,6 +66,20 @@
     cursor: pointer;
   }
   button:hover { background: #4a4d5a; }
+  .filter-group {
+    display: flex;
+    gap: 0;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #444;
+  }
+  .filter-group button {
+    border-radius: 0;
+  }
+  .filter-group button.active {
+    background: #4a90d9;
+    color: #fff;
+  }
   .section {
     max-width: 900px;
     margin: 0 auto 32px;
@@ -130,7 +144,11 @@
 
 <div class="controls">
   <input type="text" id="search" placeholder="Search sprites...">
-  <button id="hideChecked">Hide Collected</button>
+  <div class="filter-group">
+    <button id="filterAll" class="active">Show All</button>
+    <button id="filterCollected">Show Collected</button>
+    <button id="filterOutstanding">Show Outstanding</button>
+  </div>
   <button id="resetAll">Reset All</button>
 </div>
 
@@ -283,7 +301,7 @@ rarityOrder.forEach(rarity => {
       card.classList.toggle("checked", checkbox.checked);
       save();
       updateProgress();
-      document.getElementById("search").dispatchEvent(new Event("input"));
+      applyFilters();
     }
 
     checkbox.addEventListener("click", e => e.stopPropagation());
@@ -304,25 +322,39 @@ function updateProgress() {
   document.getElementById("progressFill").style.width = all.length ? (checked.length / all.length * 100) + "%" : "0%";
 }
 
-let hideCheckedActive = false;
+let filterMode = "all";
+const filterButtons = {
+  all: document.getElementById("filterAll"),
+  collected: document.getElementById("filterCollected"),
+  outstanding: document.getElementById("filterOutstanding"),
+};
 
-document.getElementById("search").addEventListener("input", () => {
+function applyFilters() {
   const q = document.getElementById("search").value.trim().toLowerCase();
   document.querySelectorAll(".card").forEach(card => {
-    const matches = !q || card.dataset.name.includes(q);
-    const hiddenByChecked = hideCheckedActive && card.classList.contains("checked");
-    card.style.display = (matches && !hiddenByChecked) ? "" : "none";
+    const matchesSearch = !q || card.dataset.name.includes(q);
+    const isChecked = card.classList.contains("checked");
+    const matchesFilter =
+      filterMode === "all" ||
+      (filterMode === "collected" && isChecked) ||
+      (filterMode === "outstanding" && !isChecked);
+    card.style.display = (matchesSearch && matchesFilter) ? "" : "none";
   });
   document.querySelectorAll(".section").forEach(sec => {
     const anyVisible = [...sec.querySelectorAll(".card")].some(c => c.style.display !== "none");
     sec.style.display = anyVisible ? "" : "none";
   });
-});
+}
 
-document.getElementById("hideChecked").addEventListener("click", (e) => {
-  hideCheckedActive = !hideCheckedActive;
-  e.target.textContent = hideCheckedActive ? "Show Collected" : "Hide Collected";
-  document.getElementById("search").dispatchEvent(new Event("input"));
+document.getElementById("search").addEventListener("input", applyFilters);
+
+Object.entries(filterButtons).forEach(([mode, btn]) => {
+  btn.addEventListener("click", () => {
+    filterMode = mode;
+    Object.values(filterButtons).forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    applyFilters();
+  });
 });
 
 document.getElementById("resetAll").addEventListener("click", () => {
@@ -334,6 +366,7 @@ document.getElementById("resetAll").addEventListener("click", () => {
     card.querySelector("input[type=checkbox]").checked = false;
   });
   updateProgress();
+  applyFilters();
 });
 
 updateProgress();
