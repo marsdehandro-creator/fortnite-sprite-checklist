@@ -301,6 +301,7 @@ rarityOrder.forEach(rarity => {
       card.classList.toggle("checked", checkbox.checked);
       save();
       updateProgress();
+      updateFilterCounts();
       applyFilters();
     }
 
@@ -328,6 +329,16 @@ const filterButtons = {
   collected: document.getElementById("filterCollected"),
   outstanding: document.getElementById("filterOutstanding"),
 };
+const filterLabels = { all: "Show All", collected: "Show Collected", outstanding: "Show Outstanding" };
+
+function updateFilterCounts() {
+  const total = document.querySelectorAll(".card").length;
+  const collected = document.querySelectorAll(".card.checked").length;
+  const counts = { all: total, collected: collected, outstanding: total - collected };
+  Object.entries(filterButtons).forEach(([mode, btn]) => {
+    btn.textContent = `${filterLabels[mode]} (${counts[mode]})`;
+  });
+}
 
 function applyFilters() {
   const q = document.getElementById("search").value.trim().toLowerCase();
@@ -366,10 +377,12 @@ document.getElementById("resetAll").addEventListener("click", () => {
     card.querySelector("input[type=checkbox]").checked = false;
   });
   updateProgress();
+  updateFilterCounts();
   applyFilters();
 });
 
 updateProgress();
+updateFilterCounts();
 </script>
 
 </body>
