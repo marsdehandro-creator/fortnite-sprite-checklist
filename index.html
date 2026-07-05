@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Fortnite Sprite Checklist</title>
+<style>
+  :root {
+    --rare: #4a90d9;
+    --epic: #a259d9;
+    --legendary: #e8912d;
+    --mythic: #d9534f;
+    --special: #d4af37;
+    --bg: #1b1d24;
+    --card: #262932;
+    --text: #eee;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px;
+  }
+  h1 { text-align: center; margin-bottom: 4px; }
+  .progress-wrap {
+    max-width: 900px;
+    margin: 0 auto 24px;
+    text-align: center;
+  }
+  .progress-bar {
+    background: #000;
+    border-radius: 8px;
+    height: 18px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4a90d9, #a259d9, #e8912d);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+  .controls {
+    max-width: 900px;
+    margin: 0 auto 24px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  input[type="text"] {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #12141a;
+    color: var(--text);
+    min-width: 220px;
+  }
+  button {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: none;
+    background: #3a3d4a;
+    color: var(--text);
+    cursor: pointer;
+  }
+  button:hover { background: #4a4d5a; }
+  .section {
+    max-width: 900px;
+    margin: 0 auto 32px;
+  }
+  .section h2 {
+    border-bottom: 2px solid #555;
+    padding-bottom: 6px;
+  }
+  .section.rare h2 { border-color: var(--rare); color: var(--rare); }
+  .section.epic h2 { border-color: var(--epic); color: var(--epic); }
+  .section.legendary h2 { border-color: var(--legendary); color: var(--legendary); }
+  .section.mythic h2 { border-color: var(--mythic); color: var(--mythic); }
+  .section.special h2 { border-color: var(--special); color: var(--special); }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+  .card {
+    background: var(--card);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    border: 2px solid transparent;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.2s, opacity 0.2s;
+  }
+  .card.checked {
+    border-color: #5cd65c;
+    opacity: 0.55;
+  }
+  .card img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+    background: #12141a;
+    border-radius: 8px;
+    margin-bottom: 6px;
+  }
+  .card label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .card input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Fortnite Sprite Checklist</h1>
+<div class="progress-wrap">
+  <div id="progressText">0 / 0 collected</div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+</div>
+
+<div class="controls">
+  <input type="text" id="search" placeholder="Search sprites...">
+  <button id="hideChecked">Hide Collected</button>
+  <button id="resetAll">Reset All</button>
+</div>
+
+<div id="sections"></div>
+
+<script>
+// Sprite list and image paths sourced from https://staticvacant.github.io/fnsprites/ (sprites-data.js),
+// filtered to released sprites only.
+const IMG_BASE = "https://staticvacant.github.io/fnsprites/sprites/";
+
+const sprites = [
+    { id: "water_basic", name: "Water", rarity: "Rare" },
+    { id: "water_gold", name: "Gold Water", rarity: "Special" },
+    { id: "water_candy", name: "Gummy Water", rarity: "Special" },
+    { id: "water_galaxy", name: "Galaxy Water", rarity: "Special" },
+
+    { id: "earth_basic", name: "Earth", rarity: "Rare" },
+    { id: "earth_gold", name: "Gold Earth", rarity: "Special" },
+    { id: "earth_candy", name: "Gummy Earth", rarity: "Special" },
+    { id: "earth_galaxy", name: "Galaxy Earth", rarity: "Special" },
+
+    { id: "fire_basic", name: "Fire", rarity: "Rare" },
+    { id: "fire_gold", name: "Gold Fire", rarity: "Special" },
+    { id: "fire_candy", name: "Gummy Fire", rarity: "Special" },
+    { id: "fire_galaxy", name: "Galaxy Fire", rarity: "Special" },
+
+    { id: "fishy_basic", name: "Fishy", rarity: "Rare" },
+    { id: "fishy_gold", name: "Gold Fishy", rarity: "Special" },
+    { id: "fishy_candy", name: "Gummy Fishy", rarity: "Special" },
+    { id: "fishy_galaxy", name: "Galaxy Fishy", rarity: "Special" },
+
+    { id: "duck_basic", name: "Duck", rarity: "Epic" },
+    { id: "duck_gold", name: "Gold Duck", rarity: "Special" },
+    { id: "duck_candy", name: "Gummy Duck", rarity: "Special" },
+    { id: "duck_galaxy", name: "Galaxy Duck", rarity: "Special" },
+
+    { id: "ghost_basic", name: "Ghost", rarity: "Epic" },
+    { id: "ghost_gold", name: "Gold Ghost", rarity: "Special" },
+    { id: "ghost_candy", name: "Gummy Ghost", rarity: "Special" },
+    { id: "ghost_galaxy", name: "Galaxy Ghost", rarity: "Special" },
+
+    { id: "demon_basic", name: "Demon", rarity: "Epic" },
+    { id: "demon_gold", name: "Gold Demon", rarity: "Special" },
+    { id: "demon_candy", name: "Gummy Demon", rarity: "Special" },
+    { id: "demon_galaxy", name: "Galaxy Demon", rarity: "Special" },
+
+    { id: "king_basic", name: "King", rarity: "Epic" },
+    { id: "king_gold", name: "Gold King", rarity: "Special" },
+    { id: "king_candy", name: "Gummy King", rarity: "Special" },
+    { id: "king_galaxy", name: "Galaxy King", rarity: "Special" },
+
+    { id: "striker_basic", name: "Striker", rarity: "Epic" },
+    { id: "striker_gold", name: "Gold Striker", rarity: "Special" },
+    { id: "striker_candy", name: "Gummy Striker", rarity: "Special" },
+    { id: "striker_galaxy", name: "Galaxy Striker", rarity: "Special" },
+
+    { id: "aura_basic", name: "Aura", rarity: "Epic" },
+    { id: "aura_gold", name: "Gold Aura", rarity: "Special" },
+    { id: "aura_candy", name: "Gummy Aura", rarity: "Special" },
+    { id: "aura_galaxy", name: "Galaxy Aura", rarity: "Special" },
+
+    { id: "dream_basic", name: "Dream", rarity: "Legendary" },
+    { id: "dream_gold", name: "Gold Dream", rarity: "Special" },
+    { id: "dream_candy", name: "Gummy Dream", rarity: "Special" },
+    { id: "dream_galaxy", name: "Galaxy Dream", rarity: "Special" },
+
+    { id: "punk_basic", name: "Punk", rarity: "Legendary" },
+    { id: "punk_gold", name: "Gold Punk", rarity: "Special" },
+    { id: "punk_candy", name: "Gummy Punk", rarity: "Special" },
+    { id: "punk_galaxy", name: "Galaxy Punk", rarity: "Special" },
+
+    { id: "boss_basic", name: "Boss", rarity: "Legendary" },
+    { id: "boss_gold", name: "Gold Boss", rarity: "Special" },
+    { id: "boss_candy", name: "Gummy Boss", rarity: "Special" },
+    { id: "boss_galaxy", name: "Galaxy Boss", rarity: "Special" },
+
+    { id: "zeropoint_basic", name: "Zero Point", rarity: "Mythic" },
+    { id: "zeropoint_gold", name: "Gold Zero Point", rarity: "Special" },
+    { id: "zeropoint_candy", name: "Gummy Zero Point", rarity: "Special" },
+    { id: "zeropoint_galaxy", name: "Galaxy Zero Point", rarity: "Special" },
+
+    { id: "theburntpeanut_basic", name: "Burnt Peanut", rarity: "Mythic" },
+
+    { id: "grim_basic", name: "Grim", rarity: "Mythic" },
+    { id: "grim_gold", name: "Gold Grim", rarity: "Special" },
+    { id: "grim_candy", name: "Gummy Grim", rarity: "Special" },
+    { id: "grim_galaxy", name: "Galaxy Grim", rarity: "Special" },
+];
+
+const rarityOrder = ["Rare", "Epic", "Legendary", "Mythic", "Special"];
+
+const STORAGE_KEY = "fortniteSpriteChecklist";
+let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+const sectionsEl = document.getElementById("sections");
+
+rarityOrder.forEach(rarity => {
+  const items = sprites.filter(s => s.rarity === rarity);
+  if (!items.length) return;
+
+  const section = document.createElement("div");
+  section.className = "section " + rarity.toLowerCase();
+
+  const heading = document.createElement("h2");
+  heading.textContent = rarity + " Sprites";
+  section.appendChild(heading);
+
+  const grid = document.createElement("div");
+  grid.className = "grid";
+
+  items.forEach(sprite => {
+    const id = sprite.id;
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.id = id;
+    card.dataset.name = sprite.name.toLowerCase();
+
+    const img = document.createElement("img");
+    img.src = IMG_BASE + id + ".png";
+    img.alt = sprite.name;
+    img.loading = "lazy";
+
+    const label = document.createElement("label");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = !!state[id];
+
+    const span = document.createElement("span");
+    span.textContent = sprite.name;
+
+    label.appendChild(checkbox);
+    label.appendChild(span);
+
+    card.appendChild(img);
+    card.appendChild(label);
+
+    if (checkbox.checked) card.classList.add("checked");
+
+    function toggle() {
+      checkbox.checked = !checkbox.checked;
+      commit();
+    }
+
+    function commit() {
+      state[id] = checkbox.checked;
+      card.classList.toggle("checked", checkbox.checked);
+      save();
+      updateProgress();
+      document.getElementById("search").dispatchEvent(new Event("input"));
+    }
+
+    checkbox.addEventListener("click", e => e.stopPropagation());
+    checkbox.addEventListener("change", commit);
+    card.addEventListener("click", toggle);
+
+    grid.appendChild(card);
+  });
+
+  section.appendChild(grid);
+  sectionsEl.appendChild(section);
+});
+
+function updateProgress() {
+  const all = document.querySelectorAll(".card input[type=checkbox]");
+  const checked = document.querySelectorAll(".card input[type=checkbox]:checked");
+  document.getElementById("progressText").textContent = `${checked.length} / ${all.length} collected`;
+  document.getElementById("progressFill").style.width = all.length ? (checked.length / all.length * 100) + "%" : "0%";
+}
+
+let hideCheckedActive = false;
+
+document.getElementById("search").addEventListener("input", () => {
+  const q = document.getElementById("search").value.trim().toLowerCase();
+  document.querySelectorAll(".card").forEach(card => {
+    const matches = !q || card.dataset.name.includes(q);
+    const hiddenByChecked = hideCheckedActive && card.classList.contains("checked");
+    card.style.display = (matches && !hiddenByChecked) ? "" : "none";
+  });
+  document.querySelectorAll(".section").forEach(sec => {
+    const anyVisible = [...sec.querySelectorAll(".card")].some(c => c.style.display !== "none");
+    sec.style.display = anyVisible ? "" : "none";
+  });
+});
+
+document.getElementById("hideChecked").addEventListener("click", (e) => {
+  hideCheckedActive = !hideCheckedActive;
+  e.target.textContent = hideCheckedActive ? "Show Collected" : "Hide Collected";
+  document.getElementById("search").dispatchEvent(new Event("input"));
+});
+
+document.getElementById("resetAll").addEventListener("click", () => {
+  if (!confirm("Reset all collected sprites?")) return;
+  state = {};
+  save();
+  document.querySelectorAll(".card").forEach(card => {
+    card.classList.remove("checked");
+    card.querySelector("input[type=checkbox]").checked = false;
+  });
+  updateProgress();
+});
+
+updateProgress();
+</script>
+
+</body>
+</html>
