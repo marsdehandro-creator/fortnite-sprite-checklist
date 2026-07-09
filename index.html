@@ -287,10 +287,36 @@
     border-radius: 4px;
     padding: 1px 4px;
   }
+  #spriteRain {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .rain-sprite {
+    position: absolute;
+    top: -10%;
+    animation-name: spriteFall;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    will-change: transform;
+  }
+  @keyframes spriteFall {
+    0% { transform: translateY(-10vh) rotate(0deg); }
+    100% { transform: translateY(110vh) rotate(360deg); }
+  }
+  .page-content {
+    position: relative;
+    z-index: 1;
+  }
 </style>
 </head>
 <body>
 
+<div id="spriteRain"></div>
+
+<div class="page-content">
 <h1>Fortnite Sprite Checklist</h1>
 <div class="subtitle">Grouped by sprite family &middot; variants shown left to right</div>
 
@@ -322,6 +348,7 @@
 
 <div class="grid-wrap" id="releasedView"></div>
 <div class="grid-wrap" id="unreleasedView" style="display:none;"></div>
+</div>
 
 <script>
 // Sprite list and image paths sourced from https://staticvacant.github.io/fnsprites/ (sprites-data.js).
@@ -744,9 +771,36 @@ tabUnreleased.addEventListener("click", () => {
   unreleasedNote.style.display = "";
 });
 
+function buildSpriteRain() {
+  const rainIds = ["water_basic","earth_basic","fire_basic","fishy_basic","duck_basic","ghost_basic",
+    "demon_basic","king_basic","striker_basic","aura_basic","dream_basic","punk_basic","boss_basic",
+    "zeropoint_basic","grim_basic"];
+  const container = document.getElementById("spriteRain");
+  const count = 22;
+  for (let i = 0; i < count; i++) {
+    const id = rainIds[Math.floor(Math.random() * rainIds.length)];
+    const img = document.createElement("img");
+    img.className = "rain-sprite";
+    img.src = IMG_BASE + id + ".png";
+    img.alt = "";
+    const size = 24 + Math.random() * 40;
+    const duration = 12 + Math.random() * 16;
+    const delay = -Math.random() * duration;
+    const left = Math.random() * 100;
+    const opacity = 0.08 + Math.random() * 0.14;
+    img.style.left = left + "vw";
+    img.style.width = size + "px";
+    img.style.opacity = opacity;
+    img.style.animationDuration = duration + "s";
+    img.style.animationDelay = delay + "s";
+    container.appendChild(img);
+  }
+}
+
 buildReleasedView();
 buildUnreleasedView();
 buildRarityFilters();
+buildSpriteRain();
 updateProgress();
 updateFilterCounts();
 applyFilters();
