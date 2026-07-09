@@ -124,6 +124,33 @@
     color: #fff;
   }
 
+  .rarity-filters {
+    max-width: 1000px;
+    margin: 0 auto 24px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .rarity-chip-btn {
+    padding: 6px 14px;
+    border-radius: 16px;
+    background: transparent;
+    color: var(--dim);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .rarity-chip-btn.rare { border: 2px solid var(--rare); }
+  .rarity-chip-btn.epic { border: 2px solid var(--epic); }
+  .rarity-chip-btn.legendary { border: 2px solid var(--legendary); }
+  .rarity-chip-btn.mythic { border: 2px solid var(--mythic); }
+  .rarity-chip-btn.special { border: 2px solid var(--special); }
+  .rarity-chip-btn.rare.active { background: #4a90d9; color: #fff; box-shadow: 0 0 8px rgba(74,144,217,0.6); }
+  .rarity-chip-btn.epic.active { background: #a259d9; color: #fff; box-shadow: 0 0 8px rgba(162,89,217,0.6); }
+  .rarity-chip-btn.legendary.active { background: #e8912d; color: #fff; box-shadow: 0 0 8px rgba(232,145,45,0.6); }
+  .rarity-chip-btn.mythic.active { background: #d9534f; color: #fff; box-shadow: 0 0 8px rgba(217,83,79,0.6); }
+  .rarity-chip-btn.special.active { background: #d4af37; color: #1b1d24; box-shadow: 0 0 8px rgba(212,175,55,0.6); }
+
   .grid-wrap {
     max-width: 1000px;
     margin: 0 auto;
@@ -286,6 +313,8 @@
   </div>
   <button id="resetAll">Reset All</button>
 </div>
+
+<div class="rarity-filters" id="rarityFilters"></div>
 
 <div class="unreleased-note" id="unreleasedNote" style="display:none;">
   Sprites shown here aren't obtainable yet — showcased for reference only, no progress tracking.
@@ -491,6 +520,7 @@ function buildReleasedView() {
       const label = document.createElement("span");
       label.className = "variant-label";
       label.textContent = sprite.variant === "basic" ? sprite.rarity : variantLabels[sprite.variant];
+      chip.dataset.label = label.textContent;
 
       const lockIcon = document.createElement("span");
       lockIcon.className = "lock-icon";
@@ -611,6 +641,38 @@ function updateFilterCounts() {
   });
 }
 
+const RARITY_FILTER_LABELS = [
+  { label: "Rare", cls: "rare" },
+  { label: "Epic", cls: "epic" },
+  { label: "Legendary", cls: "legendary" },
+  { label: "Mythic", cls: "mythic" },
+  { label: "Gold", cls: "special" },
+  { label: "Gummy", cls: "special" },
+  { label: "Galaxy", cls: "special" },
+  { label: "Holofoil", cls: "special" },
+];
+const activeRarityLabels = new Set(RARITY_FILTER_LABELS.map(r => r.label));
+
+function buildRarityFilters() {
+  const wrap = document.getElementById("rarityFilters");
+  RARITY_FILTER_LABELS.forEach(({ label, cls }) => {
+    const btn = document.createElement("button");
+    btn.className = `rarity-chip-btn ${cls} active`;
+    btn.textContent = label;
+    btn.addEventListener("click", () => {
+      if (activeRarityLabels.has(label)) {
+        activeRarityLabels.delete(label);
+        btn.classList.remove("active");
+      } else {
+        activeRarityLabels.add(label);
+        btn.classList.add("active");
+      }
+      applyFilters();
+    });
+    wrap.appendChild(btn);
+  });
+}
+
 function applyFilters() {
   const q = document.getElementById("search").value.trim().toLowerCase();
   document.querySelectorAll("#releasedView .variant-chip").forEach(chip => {
@@ -620,7 +682,8 @@ function applyFilters() {
       filterMode === "all" ||
       (filterMode === "collected" && !isLocked) ||
       (filterMode === "outstanding" && isLocked);
-    chip.style.display = (matchesSearch && matchesFilter) ? "" : "none";
+    const matchesRarity = activeRarityLabels.has(chip.dataset.label);
+    chip.style.display = (matchesSearch && matchesFilter && matchesRarity) ? "" : "none";
   });
   document.querySelectorAll("#releasedView .family-card").forEach(card => {
     const anyVisible = [...card.querySelectorAll(".variant-chip")].some(c => c.style.display !== "none");
@@ -657,6 +720,7 @@ const releasedView = document.getElementById("releasedView");
 const unreleasedView = document.getElementById("unreleasedView");
 const progressWrap = document.getElementById("progressWrap");
 const controls = document.getElementById("controls");
+const rarityFilters = document.getElementById("rarityFilters");
 const unreleasedNote = document.getElementById("unreleasedNote");
 
 tabReleased.addEventListener("click", () => {
@@ -666,6 +730,7 @@ tabReleased.addEventListener("click", () => {
   unreleasedView.style.display = "none";
   progressWrap.style.display = "";
   controls.style.display = "";
+  rarityFilters.style.display = "";
   unreleasedNote.style.display = "none";
 });
 tabUnreleased.addEventListener("click", () => {
@@ -675,13 +740,16 @@ tabUnreleased.addEventListener("click", () => {
   releasedView.style.display = "none";
   progressWrap.style.display = "none";
   controls.style.display = "none";
+  rarityFilters.style.display = "none";
   unreleasedNote.style.display = "";
 });
 
 buildReleasedView();
 buildUnreleasedView();
+buildRarityFilters();
 updateProgress();
 updateFilterCounts();
+applyFilters();
 </script>
 
 </body>
