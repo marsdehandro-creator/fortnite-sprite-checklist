@@ -1119,8 +1119,9 @@ function buildMasteredView() {
     container.appendChild(card);
   });
 
+  const totalCollected = sprites.filter(s => !!state[s.id]).length;
   const counterEl = document.getElementById("masteredTotalCounter");
-  counterEl.innerHTML = `${totalMastered} Mastered <span class="counter-sub">/ ${sprites.length}</span>`;
+  counterEl.innerHTML = `${totalMastered} Mastered <span class="counter-sub">/ ${totalCollected} Collected</span>`;
 }
 
 function bitsToCompact(boolArray) {
