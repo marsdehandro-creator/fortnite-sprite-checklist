@@ -358,10 +358,36 @@
   /* Mastered tab */
   .mastered-note {
     max-width: 1000px;
-    margin: 0 auto 20px;
+    margin: 0 auto 8px;
     text-align: center;
     color: var(--dim);
     font-size: 14px;
+  }
+  .mastered-total-counter {
+    text-align: center;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    margin: 0 auto 22px;
+    background: linear-gradient(90deg, var(--rare), var(--epic), var(--legendary), var(--mythic), var(--special), var(--rare));
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: rainbowShift 6s linear infinite;
+    filter: drop-shadow(0 0 10px rgba(212,175,55,0.25));
+  }
+  .mastered-total-counter .counter-sub {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--dim);
+    -webkit-background-clip: initial;
+    background-clip: initial;
+    background: none;
+  }
+  @keyframes rainbowShift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
   }
   .mastered-split {
     display: grid;
@@ -384,6 +410,11 @@
     content: "—";
     color: var(--dim);
     font-size: 13px;
+  }
+  #masteredView .family-card {
+    background-color: rgba(0, 0, 0, 0.32);
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.6), inset 0 0 32px rgba(0, 0, 0, 0.3);
   }
   @media (max-width: 640px) {
     .mastered-split {
@@ -463,6 +494,7 @@
 <div class="mastered-note" id="masteredNote" style="display:none;">
   Every released variant, split by mastery status &middot; click a sprite to collect it, click the crown to master it.
 </div>
+<div class="mastered-total-counter" id="masteredTotalCounter" style="display:none;"></div>
 
 <div class="grid-wrap" id="releasedView"></div>
 <div class="grid-wrap" id="unreleasedView" style="display:none;"></div>
@@ -776,6 +808,7 @@ function buildReleasedView() {
 function buildMasteredView() {
   const container = document.getElementById("masteredView");
   container.innerHTML = "";
+  let totalMastered = 0;
   groupByFamily(sprites).forEach(group => {
     const card = document.createElement("div");
     card.className = "family-card";
@@ -797,6 +830,7 @@ function buildMasteredView() {
     count.className = "family-count";
     const masteredCount = group.items.filter(s => !!mastery[s.id] && !!state[s.id]).length;
     count.textContent = `${masteredCount} / ${group.items.length} mastered`;
+    totalMastered += masteredCount;
 
     header.appendChild(icon);
     header.appendChild(title);
@@ -831,6 +865,9 @@ function buildMasteredView() {
     card.appendChild(split);
     container.appendChild(card);
   });
+
+  const counterEl = document.getElementById("masteredTotalCounter");
+  counterEl.innerHTML = `${totalMastered} Mastered <span class="counter-sub">/ ${sprites.length}</span>`;
 }
 
 function buildUnreleasedView() {
@@ -1011,6 +1048,7 @@ const controls = document.getElementById("controls");
 const rarityFilters = document.getElementById("rarityFilters");
 const unreleasedNote = document.getElementById("unreleasedNote");
 const masteredNote = document.getElementById("masteredNote");
+const masteredTotalCounter = document.getElementById("masteredTotalCounter");
 
 const allTabs = [tabReleased, tabUnreleased, tabMastered];
 const allViews = [releasedView, unreleasedView, masteredView];
@@ -1025,6 +1063,7 @@ tabReleased.addEventListener("click", () => {
   rarityFilters.style.display = "";
   unreleasedNote.style.display = "none";
   masteredNote.style.display = "none";
+  masteredTotalCounter.style.display = "none";
 });
 tabUnreleased.addEventListener("click", () => {
   allTabs.forEach(t => t.classList.remove("active"));
@@ -1036,6 +1075,7 @@ tabUnreleased.addEventListener("click", () => {
   rarityFilters.style.display = "none";
   unreleasedNote.style.display = "";
   masteredNote.style.display = "none";
+  masteredTotalCounter.style.display = "none";
 });
 tabMastered.addEventListener("click", () => {
   allTabs.forEach(t => t.classList.remove("active"));
@@ -1047,6 +1087,7 @@ tabMastered.addEventListener("click", () => {
   rarityFilters.style.display = "none";
   unreleasedNote.style.display = "none";
   masteredNote.style.display = "";
+  masteredTotalCounter.style.display = "";
 });
 
 function buildSpriteRain() {
