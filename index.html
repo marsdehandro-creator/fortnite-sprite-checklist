@@ -514,6 +514,21 @@
     color: #1b1d24;
     font-weight: 700;
   }
+  .share-link-display {
+    display: block;
+    word-break: break-all;
+    background: #12141a;
+    border: 1px solid rgba(212,175,55,0.4);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 18px;
+    color: #6fb3ff;
+    text-decoration: underline;
+    font-size: 13px;
+  }
+  .share-link-display:hover {
+    color: #9ccbff;
+  }
 
   /* Friends tab */
   .friends-note {
@@ -681,6 +696,18 @@
     <div class="modal-actions">
       <button id="importCancelBtn">Cancel</button>
       <button id="importConfirmBtn" class="primary">Save Friend</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="shareModalOverlay" style="display:none;">
+  <div class="modal-box">
+    <h2>Share Your Progress</h2>
+    <p>Send this link to a friend so they can track your sprite collection.</p>
+    <a href="#" id="shareLinkAnchor" class="share-link-display" target="_blank" rel="noopener"></a>
+    <div class="modal-actions">
+      <button id="shareCloseBtn">Close</button>
+      <button id="shareCopyBtn" class="primary">Copy Link</button>
     </div>
   </div>
 </div>
@@ -1096,24 +1123,53 @@ function buildMasteredView() {
   counterEl.innerHTML = `${totalMastered} Mastered <span class="counter-sub">/ ${sprites.length}</span>`;
 }
 
+function bitsToCompact(boolArray) {
+  const byteCount = Math.ceil(boolArray.length / 8);
+  const bytes = new Uint8Array(byteCount);
+  boolArray.forEach((on, i) => {
+    if (on) bytes[i >> 3] |= (1 << (i % 8));
+  });
+  let binary = "";
+  bytes.forEach(b => binary += String.fromCharCode(b));
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function compactToBits(str, length) {
+  if (!str) return new Array(length).fill(false);
+  let b64 = str.replace(/-/g, "+").replace(/_/g, "/");
+  while (b64.length % 4) b64 += "=";
+  let binary;
+  try {
+    binary = atob(b64);
+  } catch (e) {
+    return new Array(length).fill(false);
+  }
+  const bits = [];
+  for (let i = 0; i < length; i++) {
+    const byte = binary.charCodeAt(i >> 3) || 0;
+    bits.push(!!(byte & (1 << (i % 8))));
+  }
+  return bits;
+}
+
 function buildShareUrl() {
-  const collectedIds = sprites.filter(s => state[s.id]).map(s => s.id);
-  const masteredIds = sprites.filter(s => state[s.id] && mastery[s.id]).map(s => s.id);
+  const collectedBits = sprites.map(s => !!state[s.id]);
+  const masteredBits = sprites.map(s => !!(state[s.id] && mastery[s.id]));
   const params = new URLSearchParams();
-  params.set("friendshare", "1");
-  params.set("c", collectedIds.join(","));
-  params.set("m", masteredIds.join(","));
+  params.set("fs", "1");
+  params.set("c", bitsToCompact(collectedBits));
+  params.set("m", bitsToCompact(masteredBits));
   return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
 }
 
 function parseShareParams(search) {
   const params = new URLSearchParams(search);
-  if (params.get("friendshare") !== "1") return null;
-  const c = params.get("c") || "";
-  const m = params.get("m") || "";
+  if (params.get("fs") !== "1") return null;
+  const cBits = compactToBits(params.get("c") || "", sprites.length);
+  const mBits = compactToBits(params.get("m") || "", sprites.length);
   return {
-    collectedIds: c ? c.split(",").filter(Boolean) : [],
-    masteredIds: m ? m.split(",").filter(Boolean) : [],
+    collectedIds: sprites.filter((s, i) => cBits[i]).map(s => s.id),
+    masteredIds: sprites.filter((s, i) => mBits[i]).map(s => s.id),
   };
 }
 
@@ -1246,6 +1302,8 @@ function buildFriendsView() {
   } else {
     groupByFamily(sprites).forEach(group => {
       const missing = group.items.filter(s => data.outstandingIds.includes(s.id));
+      if (!missing.length) return;
+
       const card = document.createElement("div");
       card.className = "family-card";
 
@@ -1260,18 +1318,16 @@ function buildFriendsView() {
       title.textContent = group.title;
       const count = document.createElement("div");
       count.className = "family-count";
-      count.textContent = missing.length ? `${missing.length} still needed` : "Complete!";
+      count.textContent = `${missing.length} still needed`;
       header.appendChild(icon);
       header.appendChild(title);
       header.appendChild(count);
       card.appendChild(header);
 
-      if (missing.length) {
-        const strip = document.createElement("div");
-        strip.className = "variant-strip";
-        missing.forEach(sprite => strip.appendChild(createReadOnlyChip(sprite, false, false)));
-        card.appendChild(strip);
-      }
+      const strip = document.createElement("div");
+      strip.className = "variant-strip";
+      missing.forEach(sprite => strip.appendChild(createReadOnlyChip(sprite, false, false)));
+      card.appendChild(strip);
       container.appendChild(card);
     });
   }
@@ -1517,11 +1573,26 @@ function buildSpriteRain() {
   }
 }
 
-document.getElementById("shareProgressBtn").addEventListener("click", async () => {
+document.getElementById("shareProgressBtn").addEventListener("click", () => {
   const url = buildShareUrl();
+  const anchor = document.getElementById("shareLinkAnchor");
+  anchor.href = url;
+  anchor.textContent = url;
+  document.getElementById("shareModalOverlay").style.display = "flex";
+});
+
+document.getElementById("shareCloseBtn").addEventListener("click", () => {
+  document.getElementById("shareModalOverlay").style.display = "none";
+});
+
+document.getElementById("shareCopyBtn").addEventListener("click", async () => {
+  const url = document.getElementById("shareLinkAnchor").href;
+  const btn = document.getElementById("shareCopyBtn");
   try {
     await navigator.clipboard.writeText(url);
-    alert("Share link copied to clipboard! Send it to a friend so they can track your progress.");
+    const original = btn.textContent;
+    btn.textContent = "Copied!";
+    setTimeout(() => { btn.textContent = original; }, 1500);
   } catch (e) {
     window.prompt("Copy this link to share your progress:", url);
   }
