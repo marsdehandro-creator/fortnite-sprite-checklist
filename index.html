@@ -1063,6 +1063,9 @@ function buildMasteredView() {
   container.innerHTML = "";
   let totalMastered = 0;
   groupByFamily(sprites).forEach(group => {
+    const collectedItems = group.items.filter(s => !!state[s.id]);
+    if (!collectedItems.length) return;
+
     const card = document.createElement("div");
     card.className = "family-card";
     card.dataset.family = group.family;
@@ -1081,8 +1084,8 @@ function buildMasteredView() {
 
     const count = document.createElement("div");
     count.className = "family-count";
-    const masteredCount = group.items.filter(s => !!mastery[s.id] && !!state[s.id]).length;
-    count.textContent = `${masteredCount} / ${group.items.length} mastered`;
+    const masteredCount = collectedItems.filter(s => !!mastery[s.id]).length;
+    count.textContent = `${masteredCount} / ${collectedItems.length} mastered`;
     totalMastered += masteredCount;
 
     header.appendChild(icon);
@@ -1107,9 +1110,9 @@ function buildMasteredView() {
     masteredStrip.className = "variant-strip";
     masteredCol.appendChild(masteredStrip);
 
-    group.items.forEach(sprite => {
+    collectedItems.forEach(sprite => {
       const chip = createVariantChip(sprite);
-      const isMastered = !!state[sprite.id] && !!mastery[sprite.id];
+      const isMastered = !!mastery[sprite.id];
       (isMastered ? masteredStrip : notMasteredStrip).appendChild(chip);
     });
 
