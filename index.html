@@ -1389,6 +1389,13 @@ function buildUnreleasedView() {
 }
 
 function updateProgress() {
+  document.querySelectorAll("#releasedView .variant-chip[data-id]").forEach(chip => {
+    const id = chip.dataset.id;
+    const checked = !!state[id];
+    chip.classList.toggle("locked", !checked);
+    chip.classList.toggle("mastered", checked && !!mastery[id]);
+  });
+
   const all = document.querySelectorAll("#releasedView .variant-chip");
   const checked = document.querySelectorAll("#releasedView .variant-chip:not(.locked)");
   document.getElementById("progressText").textContent = `${checked.length} / ${all.length} collected`;
