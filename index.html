@@ -530,6 +530,19 @@
     color: #9ccbff;
   }
 
+  .daily-roast {
+    max-width: 700px;
+    margin: 0 auto 20px;
+    text-align: center;
+    font-style: italic;
+    font-size: 14px;
+    color: #e8c14a;
+    background: rgba(212,175,55,0.08);
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 10px;
+    padding: 10px 18px;
+  }
+
   /* Friends tab */
   .friends-note {
     max-width: 1000px;
@@ -622,6 +635,8 @@
 <h1>Fortnite Sprite Checklist</h1>
 <div class="subtitle">Grouped by sprite family &middot; variants shown left to right</div>
 
+<div class="daily-roast" id="dailyRoast" style="display:none;"></div>
+
 <div class="tabs">
   <button id="tabReleased" class="active">Released</button>
   <button id="tabUnreleased">Unreleased</button>
@@ -708,6 +723,17 @@
     <div class="modal-actions">
       <button id="shareCloseBtn">Close</button>
       <button id="shareCopyBtn" class="primary">Copy Link</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="nameModalOverlay" style="display:none;">
+  <div class="modal-box">
+    <h2>Welcome!</h2>
+    <p>What should we call you? This is stored on your device and used to personalize the page.</p>
+    <input type="text" id="userNameInput" placeholder="e.g. Alex" autocomplete="off">
+    <div class="modal-actions">
+      <button id="nameConfirmBtn" class="primary">Let's go</button>
     </div>
   </div>
 </div>
@@ -860,6 +886,66 @@ let currentFriendSelection = null;
 
 function saveFriends() {
   localStorage.setItem(FRIENDS_KEY, JSON.stringify(friends));
+}
+
+const USER_NAME_KEY = "fortniteSpriteUserName";
+let userName = localStorage.getItem(USER_NAME_KEY) || "";
+
+function saveUserName(name) {
+  userName = name;
+  localStorage.setItem(USER_NAME_KEY, name);
+}
+
+const DAILY_MESSAGE_KEY = "fortniteSpriteDailyMessage";
+const ROAST_MESSAGES = [
+  "Breaking news: scientists confirm {name}'s sprite-capturing career is in critical condition. Immediate grinding required.",
+  "I'm holding a moment of silence for {name}'s sprite collection... it hasn't grown in days.",
+  "{name}, your sprite collection called. It wants to know if you still remember how buttons work.",
+  "Local sprites report feeling 'completely safe' from {name}'s collecting efforts.",
+  "{name}'s dedication to sprite collecting has been compared to a browser tab left open since 2019: technically still there, doing nothing.",
+  "Experts warn that {name}'s 'I'll finish it later' strategy has a zero percent success rate so far.",
+  "{name}, the sprites aren't going to catch themselves. Allegedly.",
+  "In today's news: {name} opened the checklist, looked at it, and closed it again. A nation mourns.",
+  "{name}'s sprite progress is currently trending on the 'Things That Haven't Moved This Week' chart.",
+  "Somewhere, a Holofoil sprite is laughing at {name}'s to-do list.",
+  "{name}, procrastination called — it's very proud of you.",
+  "Reports indicate {name} has mastered the art of opening this page without collecting anything.",
+  "This message is legally required to remind {name} that sprites don't collect themselves while you scroll on your phone.",
+  "{name}'s collection growth rate has been classified as 'geological.'",
+  "Breaking: {name} still hasn't found all the Gummy variants. Scientists are baffled. The sprites remain unbothered.",
+  "{name}, your commitment to 'starting tomorrow' is truly inspiring. Tomorrow never comes, but the spirit is there.",
+  "Sources close to {name}'s sprite checklist describe it as 'emotionally neglected.'",
+  "{name} has once again chosen vibes over progress. Bold strategy.",
+  "The sprites have unionized and are demanding to know when {name} is coming back.",
+  "{name}, at this rate the Unreleased tab is going to catch up to your Released tab. Do something about it.",
+];
+
+function todayString() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+
+function getDailyMessage(name) {
+  const stored = JSON.parse(localStorage.getItem(DAILY_MESSAGE_KEY) || "null");
+  const today = todayString();
+  if (stored && stored.date === today && stored.name === name) {
+    return stored.message;
+  }
+  const template = ROAST_MESSAGES[Math.floor(Math.random() * ROAST_MESSAGES.length)];
+  const message = template.split("{name}").join(name);
+  localStorage.setItem(DAILY_MESSAGE_KEY, JSON.stringify({ date: today, message, name }));
+  return message;
+}
+
+function renderDailyRoast() {
+  const el = document.getElementById("dailyRoast");
+  if (!userName) {
+    el.style.display = "none";
+    return;
+  }
+  el.textContent = "📢 " + getDailyMessage(userName);
+  const activeTab = document.querySelector(".tabs button.active");
+  el.style.display = (activeTab && activeTab.id === "tabReleased") ? "" : "none";
 }
 
 const MASTERY_CROWN_SVG = `
@@ -1527,12 +1613,13 @@ const masteredNote = document.getElementById("masteredNote");
 const masteredTotalCounter = document.getElementById("masteredTotalCounter");
 const friendsNote = document.getElementById("friendsNote");
 const friendsControls = document.getElementById("friendsControls");
+const dailyRoast = document.getElementById("dailyRoast");
 
 const allTabs = [tabReleased, tabUnreleased, tabMastered, tabFriends];
 const allViews = [releasedView, unreleasedView, masteredView, friendsView];
 
 const tabConfig = {
-  [tabReleased.id]: { tab: tabReleased, view: releasedView, progressWrap: true, controls: true, rarityFilters: true },
+  [tabReleased.id]: { tab: tabReleased, view: releasedView, progressWrap: true, controls: true, rarityFilters: true, dailyRoast: true },
   [tabUnreleased.id]: { tab: tabUnreleased, view: unreleasedView, unreleasedNote: true },
   [tabMastered.id]: { tab: tabMastered, view: masteredView, masteredNote: true, masteredTotalCounter: true },
   [tabFriends.id]: { tab: tabFriends, view: friendsView, friendsNote: true, friendsControls: true },
@@ -1552,6 +1639,7 @@ function activateTab(tabEl) {
   masteredTotalCounter.style.display = cfg.masteredTotalCounter ? "" : "none";
   friendsNote.style.display = cfg.friendsNote ? "" : "none";
   friendsControls.style.display = cfg.friendsControls ? "" : "none";
+  dailyRoast.style.display = (cfg.dailyRoast && userName) ? "" : "none";
 }
 
 allTabs.forEach(tabEl => {
@@ -1666,9 +1754,30 @@ updateProgress();
 updateFilterCounts();
 applyFilters();
 
-const incomingShare = parseShareParams(window.location.search);
-if (incomingShare) {
-  showImportModal(incomingShare);
+function proceedAfterName() {
+  renderDailyRoast();
+  const incomingShare = parseShareParams(window.location.search);
+  if (incomingShare) {
+    showImportModal(incomingShare);
+  }
+}
+
+function confirmUserName() {
+  const val = document.getElementById("userNameInput").value.trim() || "Sprite Hunter";
+  saveUserName(val);
+  document.getElementById("nameModalOverlay").style.display = "none";
+  proceedAfterName();
+}
+
+document.getElementById("nameConfirmBtn").addEventListener("click", confirmUserName);
+document.getElementById("userNameInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") confirmUserName();
+});
+
+if (!userName) {
+  document.getElementById("nameModalOverlay").style.display = "flex";
+} else {
+  proceedAfterName();
 }
 </script>
 
