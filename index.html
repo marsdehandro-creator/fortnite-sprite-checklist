@@ -355,6 +355,41 @@
   .variant-chip.unreleased .variant-label {
     color: var(--dim);
   }
+  /* Mastered tab */
+  .mastered-note {
+    max-width: 1000px;
+    margin: 0 auto 20px;
+    text-align: center;
+    color: var(--dim);
+    font-size: 14px;
+  }
+  .mastered-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .mastered-col h3 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 10px;
+    color: var(--dim);
+  }
+  .mastered-col.not-mastered h3 { color: #b5786f; }
+  .mastered-col.is-mastered h3 { color: #e8c14a; }
+  .mastered-col .variant-strip {
+    min-height: 40px;
+  }
+  .mastered-col .variant-strip:empty::after {
+    content: "—";
+    color: var(--dim);
+    font-size: 13px;
+  }
+  @media (max-width: 640px) {
+    .mastered-split {
+      grid-template-columns: 1fr;
+    }
+  }
   .coming-soon-badge {
     position: absolute;
     top: 4px;
@@ -401,6 +436,7 @@
 <div class="tabs">
   <button id="tabReleased" class="active">Released</button>
   <button id="tabUnreleased">Unreleased</button>
+  <button id="tabMastered">Mastered</button>
 </div>
 
 <div class="progress-wrap" id="progressWrap">
@@ -424,8 +460,13 @@
   Sprites shown here aren't obtainable yet — showcased for reference only, no progress tracking.
 </div>
 
+<div class="mastered-note" id="masteredNote" style="display:none;">
+  Every released variant, split by mastery status &middot; click a sprite to collect it, click the crown to master it.
+</div>
+
 <div class="grid-wrap" id="releasedView"></div>
 <div class="grid-wrap" id="unreleasedView" style="display:none;"></div>
+<div class="grid-wrap" id="masteredView" style="display:none;"></div>
 </div>
 
 <script>
@@ -623,6 +664,73 @@ function crownBadgeMarkup(family) {
     </div>`;
 }
 
+function createVariantChip(sprite) {
+  const id = sprite.id;
+  const chip = document.createElement("div");
+  const colorClass = sprite.variant === "basic" ? sprite.rarity.toLowerCase() : "special";
+  chip.className = "variant-chip " + colorClass + (sprite.variant === "holofoil" ? " holofoil" : "");
+  chip.dataset.id = id;
+  chip.dataset.name = sprite.name.toLowerCase();
+
+  const img = document.createElement("img");
+  img.src = IMG_BASE + id + ".png";
+  img.alt = sprite.name;
+  img.loading = "lazy";
+
+  const label = document.createElement("span");
+  label.className = "variant-label";
+  label.textContent = sprite.variant === "basic" ? sprite.rarity : variantLabels[sprite.variant];
+  chip.dataset.label = label.textContent;
+
+  const lockIcon = document.createElement("span");
+  lockIcon.className = "lock-icon";
+  lockIcon.textContent = "\u{1F512}";
+
+  const checkBadge = document.createElement("span");
+  checkBadge.className = "check-badge";
+  checkBadge.textContent = "✓";
+
+  const masteryBtn = document.createElement("button");
+  masteryBtn.type = "button";
+  masteryBtn.className = "mastery-crown";
+  masteryBtn.title = "Mark as mastered";
+  masteryBtn.innerHTML = MASTERY_CROWN_SVG;
+  masteryBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (chip.classList.contains("locked")) return;
+    mastery[id] = !mastery[id];
+    chip.classList.toggle("mastered", !!mastery[id]);
+    saveMastery();
+    updateProgress();
+  });
+
+  chip.appendChild(img);
+  chip.appendChild(label);
+  chip.appendChild(lockIcon);
+  chip.appendChild(checkBadge);
+  chip.appendChild(masteryBtn);
+
+  const checked = !!state[id];
+  chip.classList.toggle("locked", !checked);
+  chip.classList.toggle("mastered", checked && !!mastery[id]);
+
+  chip.addEventListener("click", () => {
+    state[id] = !state[id];
+    chip.classList.toggle("locked", !state[id]);
+    if (!state[id]) {
+      mastery[id] = false;
+      chip.classList.remove("mastered");
+      saveMastery();
+    }
+    save();
+    updateProgress();
+    updateFilterCounts();
+    applyFilters();
+  });
+
+  return chip;
+}
+
 function buildReleasedView() {
   const container = document.getElementById("releasedView");
   container.innerHTML = "";
@@ -657,74 +765,70 @@ function buildReleasedView() {
     strip.className = "variant-strip";
 
     group.items.forEach(sprite => {
-      const id = sprite.id;
-      const chip = document.createElement("div");
-      const colorClass = sprite.variant === "basic" ? sprite.rarity.toLowerCase() : "special";
-      chip.className = "variant-chip " + colorClass + (sprite.variant === "holofoil" ? " holofoil" : "");
-      chip.dataset.id = id;
-      chip.dataset.name = sprite.name.toLowerCase();
-
-      const img = document.createElement("img");
-      img.src = IMG_BASE + id + ".png";
-      img.alt = sprite.name;
-      img.loading = "lazy";
-
-      const label = document.createElement("span");
-      label.className = "variant-label";
-      label.textContent = sprite.variant === "basic" ? sprite.rarity : variantLabels[sprite.variant];
-      chip.dataset.label = label.textContent;
-
-      const lockIcon = document.createElement("span");
-      lockIcon.className = "lock-icon";
-      lockIcon.textContent = "\u{1F512}";
-
-      const checkBadge = document.createElement("span");
-      checkBadge.className = "check-badge";
-      checkBadge.textContent = "✓";
-
-      const masteryBtn = document.createElement("button");
-      masteryBtn.type = "button";
-      masteryBtn.className = "mastery-crown";
-      masteryBtn.title = "Mark as mastered";
-      masteryBtn.innerHTML = MASTERY_CROWN_SVG;
-      masteryBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if (chip.classList.contains("locked")) return;
-        mastery[id] = !mastery[id];
-        chip.classList.toggle("mastered", !!mastery[id]);
-        saveMastery();
-        updateProgress();
-      });
-
-      chip.appendChild(img);
-      chip.appendChild(label);
-      chip.appendChild(lockIcon);
-      chip.appendChild(checkBadge);
-      chip.appendChild(masteryBtn);
-
-      const checked = !!state[id];
-      chip.classList.toggle("locked", !checked);
-      chip.classList.toggle("mastered", checked && !!mastery[id]);
-
-      function toggle() {
-        state[id] = !state[id];
-        chip.classList.toggle("locked", !state[id]);
-        if (!state[id]) {
-          mastery[id] = false;
-          chip.classList.remove("mastered");
-          saveMastery();
-        }
-        save();
-        updateProgress();
-        updateFilterCounts();
-        applyFilters();
-      }
-      chip.addEventListener("click", toggle);
-
-      strip.appendChild(chip);
+      strip.appendChild(createVariantChip(sprite));
     });
 
     card.appendChild(strip);
+    container.appendChild(card);
+  });
+}
+
+function buildMasteredView() {
+  const container = document.getElementById("masteredView");
+  container.innerHTML = "";
+  groupByFamily(sprites).forEach(group => {
+    const card = document.createElement("div");
+    card.className = "family-card";
+    card.dataset.family = group.family;
+
+    const header = document.createElement("div");
+    header.className = "family-header";
+
+    const icon = document.createElement("div");
+    icon.className = "family-icon";
+    const basicItem = group.items.find(i => i.variant === "basic") || group.items[0];
+    icon.style.backgroundImage = `url(${IMG_BASE}${basicItem.id}.png)`;
+
+    const title = document.createElement("div");
+    title.className = "family-title";
+    title.textContent = group.title;
+
+    const count = document.createElement("div");
+    count.className = "family-count";
+    const masteredCount = group.items.filter(s => !!mastery[s.id] && !!state[s.id]).length;
+    count.textContent = `${masteredCount} / ${group.items.length} mastered`;
+
+    header.appendChild(icon);
+    header.appendChild(title);
+    header.appendChild(count);
+    card.appendChild(header);
+
+    const split = document.createElement("div");
+    split.className = "mastered-split";
+
+    const notMasteredCol = document.createElement("div");
+    notMasteredCol.className = "mastered-col not-mastered";
+    notMasteredCol.innerHTML = "<h3>Not Mastered</h3>";
+    const notMasteredStrip = document.createElement("div");
+    notMasteredStrip.className = "variant-strip";
+    notMasteredCol.appendChild(notMasteredStrip);
+
+    const masteredCol = document.createElement("div");
+    masteredCol.className = "mastered-col is-mastered";
+    masteredCol.innerHTML = "<h3>Mastered</h3>";
+    const masteredStrip = document.createElement("div");
+    masteredStrip.className = "variant-strip";
+    masteredCol.appendChild(masteredStrip);
+
+    group.items.forEach(sprite => {
+      const chip = createVariantChip(sprite);
+      const isMastered = !!state[sprite.id] && !!mastery[sprite.id];
+      (isMastered ? masteredStrip : notMasteredStrip).appendChild(chip);
+    });
+
+    split.appendChild(notMasteredCol);
+    split.appendChild(masteredCol);
+    card.appendChild(split);
     container.appendChild(card);
   });
 }
@@ -799,6 +903,8 @@ function updateProgress() {
     card.classList.toggle("incomplete", got < total);
     card.classList.toggle("all-mastered", total > 0 && mastered === total);
   });
+
+  buildMasteredView();
 }
 
 let filterMode = "all";
@@ -896,32 +1002,51 @@ document.getElementById("resetAll").addEventListener("click", () => {
 
 const tabReleased = document.getElementById("tabReleased");
 const tabUnreleased = document.getElementById("tabUnreleased");
+const tabMastered = document.getElementById("tabMastered");
 const releasedView = document.getElementById("releasedView");
 const unreleasedView = document.getElementById("unreleasedView");
+const masteredView = document.getElementById("masteredView");
 const progressWrap = document.getElementById("progressWrap");
 const controls = document.getElementById("controls");
 const rarityFilters = document.getElementById("rarityFilters");
 const unreleasedNote = document.getElementById("unreleasedNote");
+const masteredNote = document.getElementById("masteredNote");
+
+const allTabs = [tabReleased, tabUnreleased, tabMastered];
+const allViews = [releasedView, unreleasedView, masteredView];
 
 tabReleased.addEventListener("click", () => {
+  allTabs.forEach(t => t.classList.remove("active"));
   tabReleased.classList.add("active");
-  tabUnreleased.classList.remove("active");
+  allViews.forEach(v => v.style.display = "none");
   releasedView.style.display = "";
-  unreleasedView.style.display = "none";
   progressWrap.style.display = "";
   controls.style.display = "";
   rarityFilters.style.display = "";
   unreleasedNote.style.display = "none";
+  masteredNote.style.display = "none";
 });
 tabUnreleased.addEventListener("click", () => {
+  allTabs.forEach(t => t.classList.remove("active"));
   tabUnreleased.classList.add("active");
-  tabReleased.classList.remove("active");
+  allViews.forEach(v => v.style.display = "none");
   unreleasedView.style.display = "";
-  releasedView.style.display = "none";
   progressWrap.style.display = "none";
   controls.style.display = "none";
   rarityFilters.style.display = "none";
   unreleasedNote.style.display = "";
+  masteredNote.style.display = "none";
+});
+tabMastered.addEventListener("click", () => {
+  allTabs.forEach(t => t.classList.remove("active"));
+  tabMastered.classList.add("active");
+  allViews.forEach(v => v.style.display = "none");
+  masteredView.style.display = "";
+  progressWrap.style.display = "none";
+  controls.style.display = "none";
+  rarityFilters.style.display = "none";
+  unreleasedNote.style.display = "none";
+  masteredNote.style.display = "";
 });
 
 function buildSpriteRain() {
@@ -952,6 +1077,7 @@ function buildSpriteRain() {
 
 buildReleasedView();
 buildUnreleasedView();
+buildMasteredView();
 buildRarityFilters();
 buildSpriteRain();
 updateProgress();
