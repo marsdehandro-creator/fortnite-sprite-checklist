@@ -421,6 +421,149 @@
       grid-template-columns: 1fr;
     }
   }
+
+  /* Share bar */
+  .share-bar {
+    max-width: 1000px;
+    margin: 0 auto 20px;
+    display: flex;
+    justify-content: center;
+  }
+  #shareProgressBtn {
+    background: linear-gradient(90deg, var(--rare), var(--epic), var(--legendary));
+    color: #fff;
+    font-weight: 700;
+    padding: 10px 20px;
+    border-radius: 20px;
+    box-shadow: 0 0 14px rgba(162,89,217,0.35);
+  }
+  #shareProgressBtn:hover {
+    filter: brightness(1.1);
+  }
+
+  /* Import modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 16px;
+  }
+  .modal-box {
+    background: #1d1f28;
+    border: 1px solid rgba(212,175,55,0.4);
+    border-radius: 14px;
+    padding: 24px;
+    max-width: 440px;
+    width: 100%;
+    box-shadow: 0 0 30px rgba(0,0,0,0.7);
+  }
+  .modal-box h2 {
+    margin: 0 0 10px;
+    font-size: 19px;
+    background: linear-gradient(90deg, var(--rare), var(--epic), var(--legendary), var(--mythic));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .modal-box p {
+    color: var(--dim);
+    font-size: 14px;
+    margin: 0 0 16px;
+  }
+  .modal-box label {
+    display: block;
+    font-size: 13px;
+    color: var(--dim);
+    margin-bottom: 6px;
+  }
+  .modal-box input[type="text"] {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+  .import-mode-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .import-mode-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    background: #12141a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 10px;
+  }
+  .import-mode-option input {
+    margin-top: 3px;
+  }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  .modal-actions .primary {
+    background: var(--special);
+    color: #1b1d24;
+    font-weight: 700;
+  }
+
+  /* Friends tab */
+  .friends-note {
+    max-width: 1000px;
+    margin: 0 auto 12px;
+    text-align: center;
+    color: var(--dim);
+    font-size: 14px;
+  }
+  .friends-controls {
+    max-width: 1000px;
+    margin: 0 auto 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+  }
+  .friends-controls select {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #12141a;
+    color: var(--text);
+  }
+  .friends-import-manual {
+    display: flex;
+    gap: 8px;
+  }
+  .friends-import-manual input {
+    min-width: 240px;
+  }
+  .friends-empty {
+    max-width: 600px;
+    margin: 40px auto;
+    text-align: center;
+    color: var(--dim);
+    font-size: 15px;
+  }
+  .friends-summary {
+    max-width: 1000px;
+    margin: 0 auto 16px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--special);
+  }
+  #friendsView .variant-chip.readonly {
+    cursor: default;
+  }
   .coming-soon-badge {
     position: absolute;
     top: 4px;
@@ -468,6 +611,11 @@
   <button id="tabReleased" class="active">Released</button>
   <button id="tabUnreleased">Unreleased</button>
   <button id="tabMastered">Mastered</button>
+  <button id="tabFriends">Friends</button>
+</div>
+
+<div class="share-bar">
+  <button id="shareProgressBtn">🔗 Share My Progress</button>
 </div>
 
 <div class="progress-wrap" id="progressWrap">
@@ -496,9 +644,45 @@
 </div>
 <div class="mastered-total-counter" id="masteredTotalCounter" style="display:none;"></div>
 
+<div class="friends-note" id="friendsNote" style="display:none;">
+  Track progress of friends &middot; share your link with them, or paste one they sent you below.
+</div>
+<div class="friends-controls" id="friendsControls" style="display:none;">
+  <select id="friendSelect"></select>
+  <button id="removeFriendBtn">Remove Friend</button>
+  <div class="friends-import-manual">
+    <input type="text" id="manualShareLinkInput" placeholder="Paste a friend's share link here...">
+    <button id="manualImportBtn">Add Friend</button>
+  </div>
+</div>
+
 <div class="grid-wrap" id="releasedView"></div>
 <div class="grid-wrap" id="unreleasedView" style="display:none;"></div>
 <div class="grid-wrap" id="masteredView" style="display:none;"></div>
+<div class="grid-wrap" id="friendsView" style="display:none;"></div>
+</div>
+
+<div class="modal-overlay" id="importModalOverlay" style="display:none;">
+  <div class="modal-box">
+    <h2>Track a Friend's Sprite Collection</h2>
+    <p>You've received a shared sprite progress link! Give this friend a name, and choose how you'd like to track them.</p>
+    <label for="friendNameInput">Friend's name</label>
+    <input type="text" id="friendNameInput" placeholder="e.g. Alex" autocomplete="off">
+    <div class="import-mode-options">
+      <label class="import-mode-option">
+        <input type="radio" name="importMode" value="outstanding" checked>
+        <span><strong>Track outstanding only</strong> — just save what they still need (recommended)</span>
+      </label>
+      <label class="import-mode-option">
+        <input type="radio" name="importMode" value="mirror">
+        <span><strong>Mirror full collection</strong> — save their entire collected/mastered state</span>
+      </label>
+    </div>
+    <div class="modal-actions">
+      <button id="importCancelBtn">Cancel</button>
+      <button id="importConfirmBtn" class="primary">Save Friend</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -643,6 +827,14 @@ function saveMastery() {
   localStorage.setItem(MASTERY_KEY, JSON.stringify(mastery));
 }
 
+const FRIENDS_KEY = "fortniteSpriteFriends";
+let friends = JSON.parse(localStorage.getItem(FRIENDS_KEY) || "{}");
+let currentFriendSelection = null;
+
+function saveFriends() {
+  localStorage.setItem(FRIENDS_KEY, JSON.stringify(friends));
+}
+
 const MASTERY_CROWN_SVG = `
   <svg viewBox="0 0 32 24" xmlns="http://www.w3.org/2000/svg">
     <path d="M4 10 L9 16 L23 16 L28 10 L22 13 L16 6 L10 13 Z" fill="currentColor" stroke="#8a6d1f" stroke-width="0.6" stroke-linejoin="round"/>
@@ -763,6 +955,40 @@ function createVariantChip(sprite) {
   return chip;
 }
 
+function createReadOnlyChip(sprite, collected, isMastered) {
+  const chip = document.createElement("div");
+  const colorClass = sprite.variant === "basic" ? sprite.rarity.toLowerCase() : "special";
+  chip.className = "variant-chip readonly " + colorClass + (sprite.variant === "holofoil" ? " holofoil" : "");
+  if (!collected) chip.classList.add("locked");
+  if (collected && isMastered) chip.classList.add("mastered");
+
+  const img = document.createElement("img");
+  img.src = IMG_BASE + sprite.id + ".png";
+  img.alt = sprite.name;
+  img.loading = "lazy";
+
+  const label = document.createElement("span");
+  label.className = "variant-label";
+  label.textContent = sprite.variant === "basic" ? sprite.rarity : variantLabels[sprite.variant];
+
+  chip.appendChild(img);
+  chip.appendChild(label);
+
+  if (!collected) {
+    const lockIcon = document.createElement("span");
+    lockIcon.className = "lock-icon";
+    lockIcon.textContent = "\u{1F512}";
+    chip.appendChild(lockIcon);
+  } else {
+    const checkBadge = document.createElement("span");
+    checkBadge.className = "check-badge";
+    checkBadge.textContent = "✓";
+    chip.appendChild(checkBadge);
+  }
+
+  return chip;
+}
+
 function buildReleasedView() {
   const container = document.getElementById("releasedView");
   container.innerHTML = "";
@@ -868,6 +1094,187 @@ function buildMasteredView() {
 
   const counterEl = document.getElementById("masteredTotalCounter");
   counterEl.innerHTML = `${totalMastered} Mastered <span class="counter-sub">/ ${sprites.length}</span>`;
+}
+
+function buildShareUrl() {
+  const collectedIds = sprites.filter(s => state[s.id]).map(s => s.id);
+  const masteredIds = sprites.filter(s => state[s.id] && mastery[s.id]).map(s => s.id);
+  const params = new URLSearchParams();
+  params.set("friendshare", "1");
+  params.set("c", collectedIds.join(","));
+  params.set("m", masteredIds.join(","));
+  return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+}
+
+function parseShareParams(search) {
+  const params = new URLSearchParams(search);
+  if (params.get("friendshare") !== "1") return null;
+  const c = params.get("c") || "";
+  const m = params.get("m") || "";
+  return {
+    collectedIds: c ? c.split(",").filter(Boolean) : [],
+    masteredIds: m ? m.split(",").filter(Boolean) : [],
+  };
+}
+
+let pendingImport = null;
+
+function showImportModal(shareData) {
+  pendingImport = shareData;
+  document.getElementById("friendNameInput").value = "";
+  document.querySelector('input[name="importMode"][value="outstanding"]').checked = true;
+  document.getElementById("importModalOverlay").style.display = "flex";
+}
+
+function hideImportModal() {
+  pendingImport = null;
+  document.getElementById("importModalOverlay").style.display = "none";
+}
+
+function confirmImport() {
+  if (!pendingImport) return;
+  const name = document.getElementById("friendNameInput").value.trim();
+  if (!name) {
+    alert("Please enter a name for this friend.");
+    return;
+  }
+  const mode = document.querySelector('input[name="importMode"]:checked').value;
+  const entry = { mode, savedAt: new Date().toISOString() };
+  if (mode === "mirror") {
+    entry.collectedIds = pendingImport.collectedIds;
+    entry.masteredIds = pendingImport.masteredIds;
+  } else {
+    entry.outstandingIds = sprites.map(s => s.id).filter(id => !pendingImport.collectedIds.includes(id));
+  }
+  friends[name] = entry;
+  saveFriends();
+  hideImportModal();
+
+  const cleanUrl = window.location.origin + window.location.pathname;
+  window.history.replaceState({}, document.title, cleanUrl);
+
+  currentFriendSelection = name;
+  populateFriendSelector();
+  buildFriendsView();
+  activateTab(tabFriends);
+}
+
+function populateFriendSelector() {
+  const select = document.getElementById("friendSelect");
+  const names = Object.keys(friends);
+  select.innerHTML = "";
+  names.forEach(name => {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    select.appendChild(opt);
+  });
+  if (!names.length) return;
+  if (!currentFriendSelection || !friends[currentFriendSelection]) {
+    currentFriendSelection = names[0];
+  }
+  select.value = currentFriendSelection;
+}
+
+function buildFriendsView() {
+  const container = document.getElementById("friendsView");
+  container.innerHTML = "";
+  const names = Object.keys(friends);
+  const removeBtn = document.getElementById("removeFriendBtn");
+  const select = document.getElementById("friendSelect");
+
+  if (!names.length) {
+    select.style.display = "none";
+    removeBtn.style.display = "none";
+    container.innerHTML = `<div class="friends-empty">No friends added yet. Share your progress link with a friend using the button above, or paste a link they sent you below.</div>`;
+    return;
+  }
+  select.style.display = "";
+  removeBtn.style.display = "";
+
+  if (!currentFriendSelection || !friends[currentFriendSelection]) {
+    currentFriendSelection = names[0];
+  }
+  const data = friends[currentFriendSelection];
+  const savedDate = new Date(data.savedAt);
+  const savedLabel = isNaN(savedDate) ? "" : savedDate.toLocaleString();
+
+  const meta = document.createElement("div");
+  meta.className = "friends-summary";
+  if (data.mode === "mirror") {
+    const gotCount = sprites.filter(s => data.collectedIds.includes(s.id)).length;
+    meta.textContent = `${currentFriendSelection}: mirroring full collection — ${gotCount} / ${sprites.length} collected (synced ${savedLabel})`;
+  } else {
+    const missingCount = data.outstandingIds.length;
+    meta.textContent = `${currentFriendSelection} still needs ${missingCount} sprite${missingCount === 1 ? "" : "s"} (synced ${savedLabel})`;
+  }
+  container.appendChild(meta);
+
+  if (data.mode === "mirror") {
+    groupByFamily(sprites).forEach(group => {
+      const card = document.createElement("div");
+      card.className = "family-card";
+
+      const header = document.createElement("div");
+      header.className = "family-header";
+      const icon = document.createElement("div");
+      icon.className = "family-icon";
+      const basicItem = group.items.find(i => i.variant === "basic") || group.items[0];
+      icon.style.backgroundImage = `url(${IMG_BASE}${basicItem.id}.png)`;
+      const title = document.createElement("div");
+      title.className = "family-title";
+      title.textContent = group.title;
+      const count = document.createElement("div");
+      count.className = "family-count";
+      const got = group.items.filter(s => data.collectedIds.includes(s.id)).length;
+      count.textContent = `${got} / ${group.items.length}`;
+      header.appendChild(icon);
+      header.appendChild(title);
+      header.appendChild(count);
+      card.appendChild(header);
+
+      const strip = document.createElement("div");
+      strip.className = "variant-strip";
+      group.items.forEach(sprite => {
+        const collected = data.collectedIds.includes(sprite.id);
+        const isMastered = collected && data.masteredIds.includes(sprite.id);
+        strip.appendChild(createReadOnlyChip(sprite, collected, isMastered));
+      });
+      card.appendChild(strip);
+      container.appendChild(card);
+    });
+  } else {
+    groupByFamily(sprites).forEach(group => {
+      const missing = group.items.filter(s => data.outstandingIds.includes(s.id));
+      const card = document.createElement("div");
+      card.className = "family-card";
+
+      const header = document.createElement("div");
+      header.className = "family-header";
+      const icon = document.createElement("div");
+      icon.className = "family-icon";
+      const basicItem = group.items.find(i => i.variant === "basic") || group.items[0];
+      icon.style.backgroundImage = `url(${IMG_BASE}${basicItem.id}.png)`;
+      const title = document.createElement("div");
+      title.className = "family-title";
+      title.textContent = group.title;
+      const count = document.createElement("div");
+      count.className = "family-count";
+      count.textContent = missing.length ? `${missing.length} still needed` : "Complete!";
+      header.appendChild(icon);
+      header.appendChild(title);
+      header.appendChild(count);
+      card.appendChild(header);
+
+      if (missing.length) {
+        const strip = document.createElement("div");
+        strip.className = "variant-strip";
+        missing.forEach(sprite => strip.appendChild(createReadOnlyChip(sprite, false, false)));
+        card.appendChild(strip);
+      }
+      container.appendChild(card);
+    });
+  }
 }
 
 function buildUnreleasedView() {
@@ -1040,54 +1447,48 @@ document.getElementById("resetAll").addEventListener("click", () => {
 const tabReleased = document.getElementById("tabReleased");
 const tabUnreleased = document.getElementById("tabUnreleased");
 const tabMastered = document.getElementById("tabMastered");
+const tabFriends = document.getElementById("tabFriends");
 const releasedView = document.getElementById("releasedView");
 const unreleasedView = document.getElementById("unreleasedView");
 const masteredView = document.getElementById("masteredView");
+const friendsView = document.getElementById("friendsView");
 const progressWrap = document.getElementById("progressWrap");
 const controls = document.getElementById("controls");
 const rarityFilters = document.getElementById("rarityFilters");
 const unreleasedNote = document.getElementById("unreleasedNote");
 const masteredNote = document.getElementById("masteredNote");
 const masteredTotalCounter = document.getElementById("masteredTotalCounter");
+const friendsNote = document.getElementById("friendsNote");
+const friendsControls = document.getElementById("friendsControls");
 
-const allTabs = [tabReleased, tabUnreleased, tabMastered];
-const allViews = [releasedView, unreleasedView, masteredView];
+const allTabs = [tabReleased, tabUnreleased, tabMastered, tabFriends];
+const allViews = [releasedView, unreleasedView, masteredView, friendsView];
 
-tabReleased.addEventListener("click", () => {
+const tabConfig = {
+  [tabReleased.id]: { tab: tabReleased, view: releasedView, progressWrap: true, controls: true, rarityFilters: true },
+  [tabUnreleased.id]: { tab: tabUnreleased, view: unreleasedView, unreleasedNote: true },
+  [tabMastered.id]: { tab: tabMastered, view: masteredView, masteredNote: true, masteredTotalCounter: true },
+  [tabFriends.id]: { tab: tabFriends, view: friendsView, friendsNote: true, friendsControls: true },
+};
+
+function activateTab(tabEl) {
+  const cfg = tabConfig[tabEl.id];
   allTabs.forEach(t => t.classList.remove("active"));
-  tabReleased.classList.add("active");
+  cfg.tab.classList.add("active");
   allViews.forEach(v => v.style.display = "none");
-  releasedView.style.display = "";
-  progressWrap.style.display = "";
-  controls.style.display = "";
-  rarityFilters.style.display = "";
-  unreleasedNote.style.display = "none";
-  masteredNote.style.display = "none";
-  masteredTotalCounter.style.display = "none";
-});
-tabUnreleased.addEventListener("click", () => {
-  allTabs.forEach(t => t.classList.remove("active"));
-  tabUnreleased.classList.add("active");
-  allViews.forEach(v => v.style.display = "none");
-  unreleasedView.style.display = "";
-  progressWrap.style.display = "none";
-  controls.style.display = "none";
-  rarityFilters.style.display = "none";
-  unreleasedNote.style.display = "";
-  masteredNote.style.display = "none";
-  masteredTotalCounter.style.display = "none";
-});
-tabMastered.addEventListener("click", () => {
-  allTabs.forEach(t => t.classList.remove("active"));
-  tabMastered.classList.add("active");
-  allViews.forEach(v => v.style.display = "none");
-  masteredView.style.display = "";
-  progressWrap.style.display = "none";
-  controls.style.display = "none";
-  rarityFilters.style.display = "none";
-  unreleasedNote.style.display = "none";
-  masteredNote.style.display = "";
-  masteredTotalCounter.style.display = "";
+  cfg.view.style.display = "";
+  progressWrap.style.display = cfg.progressWrap ? "" : "none";
+  controls.style.display = cfg.controls ? "" : "none";
+  rarityFilters.style.display = cfg.rarityFilters ? "" : "none";
+  unreleasedNote.style.display = cfg.unreleasedNote ? "" : "none";
+  masteredNote.style.display = cfg.masteredNote ? "" : "none";
+  masteredTotalCounter.style.display = cfg.masteredTotalCounter ? "" : "none";
+  friendsNote.style.display = cfg.friendsNote ? "" : "none";
+  friendsControls.style.display = cfg.friendsControls ? "" : "none";
+}
+
+allTabs.forEach(tabEl => {
+  tabEl.addEventListener("click", () => activateTab(tabEl));
 });
 
 function buildSpriteRain() {
@@ -1116,14 +1517,77 @@ function buildSpriteRain() {
   }
 }
 
+document.getElementById("shareProgressBtn").addEventListener("click", async () => {
+  const url = buildShareUrl();
+  try {
+    await navigator.clipboard.writeText(url);
+    alert("Share link copied to clipboard! Send it to a friend so they can track your progress.");
+  } catch (e) {
+    window.prompt("Copy this link to share your progress:", url);
+  }
+});
+
+document.getElementById("importCancelBtn").addEventListener("click", () => {
+  hideImportModal();
+  const cleanUrl = window.location.origin + window.location.pathname;
+  window.history.replaceState({}, document.title, cleanUrl);
+});
+
+document.getElementById("importConfirmBtn").addEventListener("click", confirmImport);
+
+document.getElementById("friendSelect").addEventListener("change", (e) => {
+  currentFriendSelection = e.target.value;
+  buildFriendsView();
+});
+
+document.getElementById("removeFriendBtn").addEventListener("click", () => {
+  if (!currentFriendSelection || !friends[currentFriendSelection]) return;
+  if (!confirm(`Remove ${currentFriendSelection} from your friends list?`)) return;
+  delete friends[currentFriendSelection];
+  saveFriends();
+  currentFriendSelection = null;
+  populateFriendSelector();
+  buildFriendsView();
+});
+
+document.getElementById("manualImportBtn").addEventListener("click", () => {
+  const raw = document.getElementById("manualShareLinkInput").value.trim();
+  if (!raw) return;
+  let search = raw;
+  try {
+    const url = new URL(raw);
+    search = url.search;
+  } catch (e) {
+    if (!raw.includes("friendshare")) {
+      alert("That doesn't look like a valid share link.");
+      return;
+    }
+    search = raw.includes("?") ? raw.slice(raw.indexOf("?")) : "?" + raw;
+  }
+  const shareData = parseShareParams(search);
+  if (!shareData) {
+    alert("That doesn't look like a valid share link.");
+    return;
+  }
+  document.getElementById("manualShareLinkInput").value = "";
+  showImportModal(shareData);
+});
+
 buildReleasedView();
 buildUnreleasedView();
 buildMasteredView();
 buildRarityFilters();
 buildSpriteRain();
+populateFriendSelector();
+buildFriendsView();
 updateProgress();
 updateFilterCounts();
 applyFilters();
+
+const incomingShare = parseShareParams(window.location.search);
+if (incomingShare) {
+  showImportModal(incomingShare);
+}
 </script>
 
 </body>
