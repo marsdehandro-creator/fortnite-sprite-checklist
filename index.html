@@ -550,6 +550,19 @@
     0%, 100% { box-shadow: 0 0 12px rgba(212,175,55,0.3); }
     50% { box-shadow: 0 0 26px rgba(212,175,55,0.6); }
   }
+  .daily-roast.celebration {
+    color: #fff;
+    font-size: 17px;
+    background: linear-gradient(120deg, var(--rare), var(--epic), var(--legendary), var(--mythic), var(--special), var(--rare));
+    background-size: 300% 300%;
+    border-color: rgba(212,175,55,0.95);
+    animation: roastPulse 2.4s ease-in-out infinite, celebrationShift 6s ease infinite;
+  }
+  @keyframes celebrationShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
   .roast-orbit-sprite {
     position: absolute;
     width: 22px;
@@ -972,20 +985,32 @@ const ROAST_MESSAGES = [
   "{name}, at this rate the Unreleased tab is going to catch up to your Released tab. Do something about it.",
 ];
 
+const CELEBRATION_MESSAGES = [
+  "🎉 {name}, ALL 66 sprites captured! You are officially a Sprite Master.",
+  "👑 Legendary status achieved, {name}! Every single sprite is yours.",
+  "🏆 {name} has completed the full collection. The sprites bow before you.",
+  "✨ Total sprite domination achieved, {name}! Nothing left to capture.",
+  "🎊 {name}, the checklist is empty because you emptied it. Incredible work.",
+  "👑 All hail {name}, ruler of every sprite in the realm.",
+  "🥳 {name} just 100%'d this thing. Somebody get the confetti.",
+  "🌟 {name}, your sprite collection has reached maximum glory.",
+];
+
 function todayString() {
   const d = new Date();
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 }
 
-function getDailyMessage(name) {
+function getDailyMessage(name, isComplete) {
   const stored = JSON.parse(localStorage.getItem(DAILY_MESSAGE_KEY) || "null");
   const today = todayString();
-  if (stored && stored.date === today && stored.name === name) {
+  if (stored && stored.date === today && stored.name === name && !!stored.complete === isComplete) {
     return stored.message;
   }
-  const template = ROAST_MESSAGES[Math.floor(Math.random() * ROAST_MESSAGES.length)];
+  const pool = isComplete ? CELEBRATION_MESSAGES : ROAST_MESSAGES;
+  const template = pool[Math.floor(Math.random() * pool.length)];
   const message = template.split("{name}").join(name);
-  localStorage.setItem(DAILY_MESSAGE_KEY, JSON.stringify({ date: today, message, name }));
+  localStorage.setItem(DAILY_MESSAGE_KEY, JSON.stringify({ date: today, message, name, complete: isComplete }));
   return message;
 }
 
@@ -995,7 +1020,11 @@ function renderDailyRoast() {
     el.style.display = "none";
     return;
   }
-  document.getElementById("dailyRoastText").textContent = "📢 " + getDailyMessage(userName);
+  const totalCollected = sprites.filter(s => !!state[s.id]).length;
+  const isComplete = totalCollected === sprites.length;
+  const prefix = isComplete ? "" : "📢 ";
+  document.getElementById("dailyRoastText").textContent = prefix + getDailyMessage(userName, isComplete);
+  el.classList.toggle("celebration", isComplete);
   const activeTab = document.querySelector(".tabs button.active");
   el.style.display = (activeTab && activeTab.id === "tabReleased") ? "" : "none";
 }
@@ -1569,6 +1598,7 @@ function updateProgress() {
   });
 
   buildMasteredView();
+  renderDailyRoast();
 }
 
 let filterMode = "all";
