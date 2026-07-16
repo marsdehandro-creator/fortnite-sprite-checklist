@@ -679,6 +679,111 @@
     color: var(--text);
   }
 
+  /* Achievements */
+  .achievements-row {
+    max-width: 500px;
+    margin: 0 auto 16px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .achievement-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    background: #1f222a;
+    border: 2px solid #3a3d4a;
+    filter: grayscale(1);
+    opacity: 0.4;
+    cursor: default;
+  }
+  .achievement-badge.unlocked {
+    background: linear-gradient(135deg, rgba(212,175,55,0.35), rgba(232,145,45,0.2));
+    border-color: rgba(212,175,55,0.85);
+    filter: none;
+    opacity: 1;
+    box-shadow: 0 0 10px rgba(212,175,55,0.45);
+  }
+
+  /* Sprite of the Day spotlight */
+  .spotlight-card {
+    max-width: 420px;
+    margin: 0 auto 20px;
+    background: #1f222a;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 12px 16px;
+  }
+  .spotlight-card.collected {
+    border-color: rgba(92,214,92,0.6);
+    background: rgba(92,214,92,0.08);
+  }
+  .spotlight-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--dim);
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  .spotlight-body {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+  }
+  .spotlight-body img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    background: #12141a;
+    border-radius: 8px;
+  }
+  .spotlight-name {
+    font-weight: 700;
+  }
+  .spotlight-meta {
+    font-size: 12px;
+    color: var(--dim);
+  }
+  .spotlight-complete {
+    text-align: center;
+    color: var(--special);
+    font-weight: 600;
+  }
+
+  /* Sprite Runner game */
+  .game-wrap {
+    max-width: 780px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .game-header {
+    display: flex;
+    justify-content: space-between;
+    max-width: 760px;
+    margin: 0 auto 8px;
+    font-weight: 700;
+    font-size: 15px;
+  }
+  #gameCanvas {
+    background: #12141a;
+    border: 2px solid #444;
+    border-radius: 10px;
+    max-width: 100%;
+    touch-action: manipulation;
+  }
+  .game-hint {
+    color: var(--dim);
+    font-size: 13px;
+    margin: 10px 0;
+  }
+
   /* Friends tab */
   .friends-note {
     max-width: 1000px;
@@ -775,6 +880,7 @@
   <button id="tabUnreleased" class="sidebar-nav-btn">Unreleased</button>
   <button id="tabMastered" class="sidebar-nav-btn">Mastered</button>
   <button id="tabFriends" class="sidebar-nav-btn">Friends</button>
+  <button id="tabGame" class="sidebar-nav-btn">🎮 Sprite Runner</button>
   <div class="sidebar-divider"></div>
   <button id="shareProgressBtn" class="sidebar-share-btn">🔗 Share My Progress</button>
 </nav>
@@ -793,6 +899,10 @@
 <div class="username-badge-wrap">
   <button id="userNameBadge" class="username-badge" style="display:none;" title="Click to update your name"></button>
 </div>
+
+<div class="achievements-row" id="achievementsRow" style="display:none;"></div>
+
+<div class="spotlight-card" id="spotlightCard" style="display:none;"></div>
 
 <div class="progress-wrap" id="progressWrap">
   <div id="progressText">0 / 0 collected</div>
@@ -836,6 +946,16 @@
 <div class="grid-wrap" id="unreleasedView" style="display:none;"></div>
 <div class="grid-wrap" id="masteredView" style="display:none;"></div>
 <div class="grid-wrap" id="friendsView" style="display:none;"></div>
+
+<div class="game-wrap" id="gameView" style="display:none;">
+  <div class="game-header">
+    <div>Score: <span id="gameScore">0</span></div>
+    <div>Best: <span id="gameHighScore">0</span></div>
+  </div>
+  <canvas id="gameCanvas" width="760" height="260"></canvas>
+  <div class="game-hint">Press Space, click, or tap the canvas to jump.</div>
+  <button id="gameStartBtn">▶ Start</button>
+</div>
 </div>
 
 <div class="modal-overlay" id="importModalOverlay" style="display:none;">
@@ -1060,6 +1180,135 @@ let userName = localStorage.getItem(USER_NAME_KEY) || "";
 function saveUserName(name) {
   userName = name;
   localStorage.setItem(USER_NAME_KEY, name);
+}
+
+const ACHIEVEMENTS_KEY = "fortniteSpriteAchievements";
+let unlockedAchievements = JSON.parse(localStorage.getItem(ACHIEVEMENTS_KEY) || "{}");
+
+function saveAchievements() {
+  localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(unlockedAchievements));
+}
+
+const ACHIEVEMENTS = [
+  { id: "first_catch", icon: "🎯", label: "First Catch", desc: "Collect your first sprite",
+    check: () => sprites.some(s => state[s.id]) },
+  { id: "first_mastery", icon: "👑", label: "First Mastery", desc: "Master your first sprite",
+    check: () => sprites.some(s => state[s.id] && mastery[s.id]) },
+  { id: "family_complete", icon: "🏠", label: "Family Complete", desc: "Fully collect any one sprite family",
+    check: () => familyOrder.some(f => {
+      const items = sprites.filter(s => s.family === f);
+      return items.length && items.every(s => state[s.id]);
+    }) },
+  { id: "family_mastered", icon: "🥇", label: "Family Mastered", desc: "Fully master every variant in one family",
+    check: () => familyOrder.some(f => {
+      const items = sprites.filter(s => s.family === f);
+      return items.length && items.every(s => state[s.id] && mastery[s.id]);
+    }) },
+  { id: "halfway", icon: "⭐", label: "Halfway Hero", desc: "Collect 50% or more of all released sprites",
+    check: () => sprites.filter(s => state[s.id]).length / sprites.length >= 0.5 },
+  { id: "mythic_hunter", icon: "💎", label: "Mythic Hunter", desc: "Collect every released Mythic-rarity sprite",
+    check: () => sprites.filter(s => s.rarity === "Mythic").every(s => state[s.id]) },
+  { id: "full_collection", icon: "💯", label: "Full Collection", desc: "Collect every released sprite",
+    check: () => sprites.every(s => state[s.id]) },
+  { id: "master_collector", icon: "🌟", label: "Master Collector", desc: "Master every released sprite",
+    check: () => sprites.every(s => state[s.id] && mastery[s.id]) },
+];
+
+function checkAchievements() {
+  let changed = false;
+  ACHIEVEMENTS.forEach(a => {
+    if (!unlockedAchievements[a.id] && a.check()) {
+      unlockedAchievements[a.id] = true;
+      changed = true;
+    }
+  });
+  if (changed) saveAchievements();
+  renderAchievements();
+}
+
+function renderAchievements() {
+  const row = document.getElementById("achievementsRow");
+  if (!userName) {
+    row.style.display = "none";
+    return;
+  }
+  row.style.display = "flex";
+  row.innerHTML = "";
+  ACHIEVEMENTS.forEach(a => {
+    const unlocked = !!unlockedAchievements[a.id];
+    const badge = document.createElement("div");
+    badge.className = "achievement-badge" + (unlocked ? " unlocked" : "");
+    badge.textContent = a.icon;
+    badge.title = unlocked ? `${a.label} — ${a.desc}` : `Locked: ${a.desc}`;
+    row.appendChild(badge);
+  });
+}
+
+const SPOTLIGHT_KEY = "fortniteSpriteSpotlight";
+
+function getSpotlightSpriteId() {
+  const today = todayString();
+  const stored = JSON.parse(localStorage.getItem(SPOTLIGHT_KEY) || "null");
+  if (stored && stored.date === today && sprites.some(s => s.id === stored.spriteId)) {
+    return stored.spriteId;
+  }
+  const outstanding = sprites.filter(s => !state[s.id]);
+  if (!outstanding.length) return null;
+  const pick = outstanding[Math.floor(Math.random() * outstanding.length)];
+  localStorage.setItem(SPOTLIGHT_KEY, JSON.stringify({ date: today, spriteId: pick.id }));
+  return pick.id;
+}
+
+function renderSpotlight() {
+  const container = document.getElementById("spotlightCard");
+  if (!userName) {
+    container.style.display = "none";
+    return;
+  }
+  const id = getSpotlightSpriteId();
+  container.innerHTML = "";
+  container.classList.remove("collected");
+  if (!id) {
+    container.classList.add("spotlight-complete-wrap");
+    const done = document.createElement("div");
+    done.className = "spotlight-complete";
+    done.textContent = "🏆 You've collected everything — no target needed today!";
+    container.appendChild(done);
+    container.style.display = "";
+    return;
+  }
+  const sprite = sprites.find(s => s.id === id);
+  const collected = !!state[id];
+  container.classList.toggle("collected", collected);
+
+  const label = document.createElement("div");
+  label.className = "spotlight-label";
+  label.textContent = collected ? "✅ Today's Target — Collected!" : "🎯 Today's Target";
+  container.appendChild(label);
+
+  const body = document.createElement("div");
+  body.className = "spotlight-body";
+
+  const img = document.createElement("img");
+  img.src = IMG_BASE + id + ".png";
+  img.alt = sprite.name;
+  body.appendChild(img);
+
+  const info = document.createElement("div");
+  const nameEl = document.createElement("div");
+  nameEl.className = "spotlight-name";
+  nameEl.textContent = sprite.name;
+  const metaEl = document.createElement("div");
+  metaEl.className = "spotlight-meta";
+  const familyLabel = familyNames[sprite.family] || sprite.family;
+  const varietyLabel = sprite.variant === "basic" ? sprite.rarity : variantLabels[sprite.variant];
+  metaEl.textContent = `${familyLabel} · ${varietyLabel}`;
+  info.appendChild(nameEl);
+  info.appendChild(metaEl);
+  body.appendChild(info);
+
+  container.appendChild(body);
+  container.style.display = "";
 }
 
 const DAILY_MESSAGE_KEY = "fortniteSpriteDailyMessage";
@@ -1700,6 +1949,8 @@ function updateProgress() {
 
   buildMasteredView();
   renderDailyRoast();
+  checkAchievements();
+  renderSpotlight();
 }
 
 let filterMode = "all";
@@ -1799,10 +2050,12 @@ const tabReleased = document.getElementById("tabReleased");
 const tabUnreleased = document.getElementById("tabUnreleased");
 const tabMastered = document.getElementById("tabMastered");
 const tabFriends = document.getElementById("tabFriends");
+const tabGame = document.getElementById("tabGame");
 const releasedView = document.getElementById("releasedView");
 const unreleasedView = document.getElementById("unreleasedView");
 const masteredView = document.getElementById("masteredView");
 const friendsView = document.getElementById("friendsView");
+const gameView = document.getElementById("gameView");
 const progressWrap = document.getElementById("progressWrap");
 const controls = document.getElementById("controls");
 const rarityFilters = document.getElementById("rarityFilters");
@@ -1811,15 +2064,18 @@ const masteredNote = document.getElementById("masteredNote");
 const masteredTotalCounter = document.getElementById("masteredTotalCounter");
 const friendsNote = document.getElementById("friendsNote");
 const friendsControls = document.getElementById("friendsControls");
+const achievementsRow = document.getElementById("achievementsRow");
+const spotlightCard = document.getElementById("spotlightCard");
 
-const allTabs = [tabReleased, tabUnreleased, tabMastered, tabFriends];
-const allViews = [releasedView, unreleasedView, masteredView, friendsView];
+const allTabs = [tabReleased, tabUnreleased, tabMastered, tabFriends, tabGame];
+const allViews = [releasedView, unreleasedView, masteredView, friendsView, gameView];
 
 const tabConfig = {
-  [tabReleased.id]: { tab: tabReleased, view: releasedView, progressWrap: true, controls: true, rarityFilters: true },
+  [tabReleased.id]: { tab: tabReleased, view: releasedView, progressWrap: true, controls: true, rarityFilters: true, achievementsRow: true, spotlightCard: true },
   [tabUnreleased.id]: { tab: tabUnreleased, view: unreleasedView, unreleasedNote: true },
   [tabMastered.id]: { tab: tabMastered, view: masteredView, masteredNote: true, masteredTotalCounter: true },
   [tabFriends.id]: { tab: tabFriends, view: friendsView, friendsNote: true, friendsControls: true },
+  [tabGame.id]: { tab: tabGame, view: gameView },
 };
 
 function activateTab(tabEl) {
@@ -1836,6 +2092,8 @@ function activateTab(tabEl) {
   masteredTotalCounter.style.display = cfg.masteredTotalCounter ? "" : "none";
   friendsNote.style.display = cfg.friendsNote ? "" : "none";
   friendsControls.style.display = cfg.friendsControls ? "" : "none";
+  if (cfg.achievementsRow) { renderAchievements(); } else { achievementsRow.style.display = "none"; }
+  if (cfg.spotlightCard) { renderSpotlight(); } else { spotlightCard.style.display = "none"; }
 }
 
 allTabs.forEach(tabEl => {
@@ -1978,6 +2236,138 @@ document.getElementById("manualImportBtn").addEventListener("click", () => {
   showImportModal(shareData);
 });
 
+const RUNNER_HIGH_SCORE_KEY = "fortniteSpriteRunnerHighScore";
+let runnerHighScore = parseInt(localStorage.getItem(RUNNER_HIGH_SCORE_KEY) || "0", 10);
+
+function initSpriteRunner() {
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  const groundY = H - 30;
+  const gravity = 0.6;
+  const jumpVelocity = -11;
+
+  const runnerSpriteImg = new Image();
+  runnerSpriteImg.src = IMG_BASE + "water_basic.png";
+
+  let player, obstacles, score, speed, lastSpawn, running, animId;
+
+  document.getElementById("gameHighScore").textContent = runnerHighScore;
+
+  function resetGame() {
+    player = { x: 50, y: groundY - 34, w: 34, h: 34, vy: 0, onGround: true };
+    obstacles = [];
+    score = 0;
+    speed = 5;
+    lastSpawn = 0;
+    running = true;
+    document.getElementById("gameScore").textContent = "0";
+  }
+
+  function spawnObstacle() {
+    const h = 24 + Math.random() * 20;
+    obstacles.push({ x: W, y: groundY - h, w: 20, h: h });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.strokeStyle = "#444";
+    ctx.beginPath();
+    ctx.moveTo(0, groundY);
+    ctx.lineTo(W, groundY);
+    ctx.stroke();
+    if (runnerSpriteImg.complete && runnerSpriteImg.naturalWidth) {
+      ctx.drawImage(runnerSpriteImg, player.x, player.y, player.w, player.h);
+    } else {
+      ctx.fillStyle = "#4a90d9";
+      ctx.fillRect(player.x, player.y, player.w, player.h);
+    }
+    ctx.fillStyle = "#d9534f";
+    obstacles.forEach(o => ctx.fillRect(o.x, o.y, o.w, o.h));
+  }
+
+  function endGame() {
+    running = false;
+    cancelAnimationFrame(animId);
+    const finalScore = Math.floor(score / 5);
+    let newBest = false;
+    if (finalScore > runnerHighScore) {
+      runnerHighScore = finalScore;
+      localStorage.setItem(RUNNER_HIGH_SCORE_KEY, String(runnerHighScore));
+      newBest = true;
+    }
+    document.getElementById("gameHighScore").textContent = runnerHighScore;
+    ctx.fillStyle = "rgba(0,0,0,0.65)";
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 22px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(newBest ? `New High Score! ${finalScore}` : `Game Over — Score: ${finalScore}`, W / 2, H / 2 - 10);
+    ctx.font = "14px sans-serif";
+    ctx.fillText("Press Space, click, or tap to play again", W / 2, H / 2 + 20);
+  }
+
+  function update() {
+    if (!running) return;
+    player.vy += gravity;
+    player.y += player.vy;
+    if (player.y >= groundY - player.h) {
+      player.y = groundY - player.h;
+      player.vy = 0;
+      player.onGround = true;
+    }
+
+    speed += 0.002;
+    score += 1;
+    document.getElementById("gameScore").textContent = Math.floor(score / 5);
+
+    lastSpawn++;
+    const spawnThreshold = Math.max(45, 90 - Math.floor(score / 200));
+    if (lastSpawn > spawnThreshold) {
+      spawnObstacle();
+      lastSpawn = 0;
+    }
+
+    obstacles.forEach(o => o.x -= speed);
+    obstacles = obstacles.filter(o => o.x + o.w > 0);
+
+    for (const o of obstacles) {
+      if (player.x < o.x + o.w && player.x + player.w > o.x && player.y < o.y + o.h && player.y + player.h > o.y) {
+        endGame();
+        return;
+      }
+    }
+
+    draw();
+    animId = requestAnimationFrame(update);
+  }
+
+  function startGame() {
+    resetGame();
+    animId = requestAnimationFrame(update);
+  }
+
+  function jump() {
+    if (!running) {
+      startGame();
+      return;
+    }
+    if (player.onGround) {
+      player.vy = jumpVelocity;
+      player.onGround = false;
+    }
+  }
+
+  document.getElementById("gameStartBtn").addEventListener("click", startGame);
+  canvas.addEventListener("click", jump);
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "Space" && tabGame.classList.contains("active")) {
+      e.preventDefault();
+      jump();
+    }
+  });
+}
+
 buildReleasedView();
 buildUnreleasedView();
 buildMasteredView();
@@ -1986,6 +2376,7 @@ buildSpriteRain();
 buildRoastOrbit();
 populateFriendSelector();
 buildFriendsView();
+initSpriteRunner();
 updateProgress();
 updateFilterCounts();
 applyFilters();
@@ -2014,6 +2405,8 @@ function openNameModal(editing) {
 function proceedAfterName() {
   renderUserNameBadge();
   renderDailyRoast();
+  renderAchievements();
+  renderSpotlight();
   const incomingShare = parseShareParams(window.location.search);
   if (incomingShare) {
     showImportModal(incomingShare);
