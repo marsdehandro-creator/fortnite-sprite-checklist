@@ -42,28 +42,92 @@
   }
   .subtitle { text-align: center; color: var(--dim); margin-bottom: 20px; font-size: 14px; }
 
-  .tabs {
-    max-width: 1000px;
-    margin: 0 auto 20px;
-    display: flex;
-    justify-content: center;
-    gap: 0;
+  .sidebar-toggle {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 47;
+    width: 42px;
+    height: 42px;
+    font-size: 20px;
     border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid #444;
-    width: fit-content;
-  }
-  .tabs button {
-    padding: 10px 22px;
-    border: none;
     background: #262932;
+    border: 1px solid #444;
+    padding: 0;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 45;
+    display: none;
+  }
+  .sidebar-backdrop.open {
+    display: block;
+  }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 240px;
+    z-index: 46;
+    background: #1b1d24;
+    border-right: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+    padding: 70px 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  .sidebar-header {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+    margin-bottom: 4px;
+  }
+  .sidebar-nav-btn {
+    text-align: left;
+    padding: 10px 14px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
     color: var(--text);
     cursor: pointer;
     font-size: 15px;
   }
-  .tabs button.active {
+  .sidebar-nav-btn:hover {
+    background: #262932;
+  }
+  .sidebar-nav-btn.active {
     background: var(--rare);
     color: #fff;
+  }
+  .sidebar-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+    margin: 8px 0;
+  }
+  .sidebar-share-btn {
+    background: linear-gradient(90deg, var(--rare), var(--epic), var(--legendary));
+    color: #fff;
+    font-weight: 700;
+    border-radius: 8px;
+    padding: 10px 14px;
+    box-shadow: 0 0 14px rgba(162,89,217,0.35);
+  }
+  .sidebar-share-btn:hover {
+    filter: brightness(1.1);
   }
 
   .progress-wrap {
@@ -422,24 +486,6 @@
     }
   }
 
-  /* Share bar */
-  .share-bar {
-    max-width: 1000px;
-    margin: 0 auto 20px;
-    display: flex;
-    justify-content: center;
-  }
-  #shareProgressBtn {
-    background: linear-gradient(90deg, var(--rare), var(--epic), var(--legendary));
-    color: #fff;
-    font-weight: 700;
-    padding: 10px 20px;
-    border-radius: 20px;
-    box-shadow: 0 0 14px rgba(162,89,217,0.35);
-  }
-  #shareProgressBtn:hover {
-    filter: brightness(1.1);
-  }
 
   /* Import modal */
   .modal-overlay {
@@ -530,11 +576,38 @@
     color: #9ccbff;
   }
 
+  .roast-badge-wrap {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 40;
+  }
+  .roast-badge-toggle {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(212,175,55,0.9), rgba(232,145,45,0.9));
+    border: 2px solid rgba(212,175,55,0.9);
+    font-size: 22px;
+    box-shadow: 0 0 10px rgba(212,175,55,0.4);
+    animation: badgePulse 2s ease-in-out infinite;
+    padding: 0;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  @keyframes badgePulse {
+    0%, 100% { box-shadow: 0 0 10px rgba(212,175,55,0.4); transform: scale(1); }
+    50% { box-shadow: 0 0 22px rgba(212,175,55,0.75); transform: scale(1.06); }
+  }
   .daily-roast {
-    position: relative;
+    position: absolute;
     overflow: visible;
-    max-width: 720px;
-    margin: 0 auto 22px;
+    bottom: 64px;
+    right: 0;
+    width: 300px;
+    max-width: calc(100vw - 48px);
     text-align: center;
     font-style: italic;
     font-weight: 700;
@@ -545,6 +618,10 @@
     border-radius: 12px;
     padding: 14px 22px;
     animation: roastPulse 2.4s ease-in-out infinite;
+    display: none;
+  }
+  .daily-roast.expanded {
+    display: block;
   }
   @keyframes roastPulse {
     0%, 100% { box-shadow: 0 0 12px rgba(212,175,55,0.3); }
@@ -689,27 +766,31 @@
 
 <div id="spriteRain"></div>
 
+<button id="sidebarToggle" class="sidebar-toggle" title="Menu">☰</button>
+<div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+<nav id="sidebar" class="sidebar">
+  <div class="sidebar-header">Menu</div>
+  <button id="tabReleased" class="sidebar-nav-btn active">Released</button>
+  <button id="tabUnreleased" class="sidebar-nav-btn">Unreleased</button>
+  <button id="tabMastered" class="sidebar-nav-btn">Mastered</button>
+  <button id="tabFriends" class="sidebar-nav-btn">Friends</button>
+  <div class="sidebar-divider"></div>
+  <button id="shareProgressBtn" class="sidebar-share-btn">🔗 Share My Progress</button>
+</nav>
+
+<div class="roast-badge-wrap" id="roastBadgeWrap" style="display:none;">
+  <button id="roastBadgeToggle" class="roast-badge-toggle" title="Daily message">📢</button>
+  <div class="daily-roast roast-popover" id="dailyRoast">
+    <span id="dailyRoastText"></span>
+  </div>
+</div>
+
 <div class="page-content">
 <h1>Fortnite Sprite Checklist</h1>
 <div class="subtitle">Grouped by sprite family &middot; variants shown left to right</div>
 
 <div class="username-badge-wrap">
   <button id="userNameBadge" class="username-badge" style="display:none;" title="Click to update your name"></button>
-</div>
-
-<div class="daily-roast" id="dailyRoast" style="display:none;">
-  <span id="dailyRoastText"></span>
-</div>
-
-<div class="tabs">
-  <button id="tabReleased" class="active">Released</button>
-  <button id="tabUnreleased">Unreleased</button>
-  <button id="tabMastered">Mastered</button>
-  <button id="tabFriends">Friends</button>
-</div>
-
-<div class="share-bar">
-  <button id="shareProgressBtn">🔗 Share My Progress</button>
 </div>
 
 <div class="progress-wrap" id="progressWrap">
@@ -1005,7 +1086,7 @@ const ROAST_MESSAGES = [
 ];
 
 const CELEBRATION_MESSAGES = [
-  "🎉 {name}, ALL 66 sprites captured! You are officially a Sprite Master.",
+  "🎉 {name}, ALL {total} sprites captured! You are officially a Sprite Master.",
   "👑 Legendary status achieved, {name}! Every single sprite is yours.",
   "🏆 {name} has completed the full collection. The sprites bow before you.",
   "✨ Total sprite domination achieved, {name}! Nothing left to capture.",
@@ -1028,24 +1109,24 @@ function getDailyMessage(name, isComplete) {
   }
   const pool = isComplete ? CELEBRATION_MESSAGES : ROAST_MESSAGES;
   const template = pool[Math.floor(Math.random() * pool.length)];
-  const message = template.split("{name}").join(name);
+  const message = template.split("{name}").join(name).split("{total}").join(sprites.length);
   localStorage.setItem(DAILY_MESSAGE_KEY, JSON.stringify({ date: today, message, name, complete: isComplete }));
   return message;
 }
 
 function renderDailyRoast() {
+  const wrap = document.getElementById("roastBadgeWrap");
   const el = document.getElementById("dailyRoast");
   if (!userName) {
-    el.style.display = "none";
+    wrap.style.display = "none";
     return;
   }
+  wrap.style.display = "";
   const totalCollected = sprites.filter(s => !!state[s.id]).length;
   const isComplete = totalCollected === sprites.length;
   const prefix = isComplete ? "" : "📢 ";
   document.getElementById("dailyRoastText").textContent = prefix + getDailyMessage(userName, isComplete);
   el.classList.toggle("celebration", isComplete);
-  const activeTab = document.querySelector(".tabs button.active");
-  el.style.display = (activeTab && activeTab.id === "tabReleased") ? "" : "none";
 }
 
 function buildRoastOrbit() {
@@ -1729,13 +1810,12 @@ const masteredNote = document.getElementById("masteredNote");
 const masteredTotalCounter = document.getElementById("masteredTotalCounter");
 const friendsNote = document.getElementById("friendsNote");
 const friendsControls = document.getElementById("friendsControls");
-const dailyRoast = document.getElementById("dailyRoast");
 
 const allTabs = [tabReleased, tabUnreleased, tabMastered, tabFriends];
 const allViews = [releasedView, unreleasedView, masteredView, friendsView];
 
 const tabConfig = {
-  [tabReleased.id]: { tab: tabReleased, view: releasedView, progressWrap: true, controls: true, rarityFilters: true, dailyRoast: true },
+  [tabReleased.id]: { tab: tabReleased, view: releasedView, progressWrap: true, controls: true, rarityFilters: true },
   [tabUnreleased.id]: { tab: tabUnreleased, view: unreleasedView, unreleasedNote: true },
   [tabMastered.id]: { tab: tabMastered, view: masteredView, masteredNote: true, masteredTotalCounter: true },
   [tabFriends.id]: { tab: tabFriends, view: friendsView, friendsNote: true, friendsControls: true },
@@ -1755,11 +1835,49 @@ function activateTab(tabEl) {
   masteredTotalCounter.style.display = cfg.masteredTotalCounter ? "" : "none";
   friendsNote.style.display = cfg.friendsNote ? "" : "none";
   friendsControls.style.display = cfg.friendsControls ? "" : "none";
-  dailyRoast.style.display = (cfg.dailyRoast && userName) ? "" : "none";
 }
 
 allTabs.forEach(tabEl => {
-  tabEl.addEventListener("click", () => activateTab(tabEl));
+  tabEl.addEventListener("click", () => {
+    activateTab(tabEl);
+    closeSidebar();
+  });
+});
+
+const sidebar = document.getElementById("sidebar");
+const sidebarBackdrop = document.getElementById("sidebarBackdrop");
+const sidebarToggle = document.getElementById("sidebarToggle");
+
+function openSidebar() {
+  sidebar.classList.add("open");
+  if (window.innerWidth <= 900) {
+    sidebarBackdrop.classList.add("open");
+  }
+}
+function closeSidebar() {
+  sidebar.classList.remove("open");
+  sidebarBackdrop.classList.remove("open");
+}
+sidebarToggle.addEventListener("click", () => {
+  if (sidebar.classList.contains("open")) closeSidebar();
+  else openSidebar();
+});
+sidebarBackdrop.addEventListener("click", closeSidebar);
+
+if (window.innerWidth > 900) {
+  openSidebar();
+}
+
+const roastBadgeToggle = document.getElementById("roastBadgeToggle");
+roastBadgeToggle.addEventListener("click", (e) => {
+  e.stopPropagation();
+  document.getElementById("dailyRoast").classList.toggle("expanded");
+});
+document.addEventListener("click", (e) => {
+  const wrap = document.getElementById("roastBadgeWrap");
+  if (!wrap.contains(e.target)) {
+    document.getElementById("dailyRoast").classList.remove("expanded");
+  }
 });
 
 function buildSpriteRain() {
