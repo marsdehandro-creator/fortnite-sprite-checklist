@@ -889,6 +889,28 @@ const sprites = [
     { id: "grim_gold", name: "Gold Grim", family: "grim", variant: "gold", rarity: "Special" },
     { id: "grim_candy", name: "Gummy Grim", family: "grim", variant: "candy", rarity: "Special" },
     { id: "grim_galaxy", name: "Galaxy Grim", family: "grim", variant: "galaxy", rarity: "Special" },
+
+    { id: "air_basic", name: "Air", family: "air", variant: "basic", rarity: "Rare" },
+    { id: "air_gold", name: "Gold Air", family: "air", variant: "gold", rarity: "Special" },
+    { id: "air_candy", name: "Gummy Air", family: "air", variant: "candy", rarity: "Special" },
+    { id: "air_galaxy", name: "Galaxy Air", family: "air", variant: "galaxy", rarity: "Special" },
+    { id: "air_holofoil", name: "Holofoil Air", family: "air", variant: "holofoil", rarity: "Special" },
+
+    { id: "seven_basic", name: "Seven", family: "seven", variant: "basic", rarity: "Legendary" },
+    { id: "seven_gold", name: "Gold Seven", family: "seven", variant: "gold", rarity: "Special" },
+    { id: "seven_candy", name: "Gummy Seven", family: "seven", variant: "candy", rarity: "Special" },
+    { id: "seven_galaxy", name: "Galaxy Seven", family: "seven", variant: "galaxy", rarity: "Special" },
+    { id: "seven_holofoil", name: "Holofoil Seven", family: "seven", variant: "holofoil", rarity: "Special" },
+
+    { id: "batman_basic", name: "Batman", family: "batman", variant: "basic", rarity: "Mythic" },
+    { id: "batman_gold", name: "Gold Batman", family: "batman", variant: "gold", rarity: "Special" },
+    { id: "batman_candy", name: "Gummy Batman", family: "batman", variant: "candy", rarity: "Special" },
+    { id: "batman_galaxy", name: "Galaxy Batman", family: "batman", variant: "galaxy", rarity: "Special" },
+    { id: "batman_holofoil", name: "Holofoil Batman", family: "batman", variant: "holofoil", rarity: "Special" },
+
+    { id: "pollo_basic", name: "Pollo", family: "pollo", variant: "basic", rarity: "Mythic" },
+
+    { id: "vini_basic", name: "Vini Jr.", family: "vini", variant: "basic", rarity: "Mythic" },
 ];
 
 // Sprites confirmed but not yet obtainable in-game (unreleased: true in the source data).
@@ -905,19 +927,15 @@ const unreleasedSprites = [
     { id: "zeropoint_holofoil", name: "Quack Zero Point", family: "zeropoint", variant: "holofoil", rarity: "Special" },
     { id: "aura_gem", name: "Gem Aura", family: "aura", variant: "gem", rarity: "Special" },
 
-    { id: "air_basic", name: "Air", family: "air", variant: "basic", rarity: "Rare" },
-    { id: "air_gold", name: "Gold Air", family: "air", variant: "gold", rarity: "Special" },
-    { id: "air_candy", name: "Gummy Air", family: "air", variant: "candy", rarity: "Special" },
-    { id: "air_galaxy", name: "Galaxy Air", family: "air", variant: "galaxy", rarity: "Special" },
-    { id: "air_holofoil", name: "Holofoil Air", family: "air", variant: "holofoil", rarity: "Special" },
-
-    { id: "seven_basic", name: "Seven", family: "seven", variant: "basic", rarity: "Legendary" },
-    { id: "seven_gold", name: "Gold Seven", family: "seven", variant: "gold", rarity: "Special" },
-    { id: "seven_candy", name: "Gummy Seven", family: "seven", variant: "candy", rarity: "Special" },
-    { id: "seven_galaxy", name: "Galaxy Seven", family: "seven", variant: "galaxy", rarity: "Special" },
-    { id: "seven_holofoil", name: "Holofoil Seven", family: "seven", variant: "holofoil", rarity: "Special" },
+    { id: "earth_rift", name: "Rift Earth", family: "earth", variant: "rift", rarity: "Special" },
+    { id: "fire_rift", name: "Rift Fire", family: "fire", variant: "rift", rarity: "Special" },
+    { id: "fishy_rift", name: "Rift Fishy", family: "fishy", variant: "rift", rarity: "Special" },
+    { id: "boss_rift", name: "Rift Boss", family: "boss", variant: "rift", rarity: "Special" },
+    { id: "grim_rift", name: "Rift Grim", family: "grim", variant: "rift", rarity: "Special" },
 
     { id: "wick_basic", name: "John Wick", family: "wick", variant: "basic", rarity: "Mythic" },
+
+    { id: "batman_rift", name: "Rift Batman", family: "batman", variant: "rift", rarity: "Special" },
 ];
 
 const familyNames = {
@@ -925,9 +943,10 @@ const familyNames = {
   ghost: "Ghost", demon: "Demon", king: "King", striker: "Striker", aura: "Aura",
   dream: "Dream", punk: "Punk", boss: "Boss", zeropoint: "Zero Point",
   theburntpeanut: "Burnt Peanut", grim: "Grim", air: "Air", seven: "Seven", wick: "John Wick",
+  batman: "Batman", pollo: "Pollo", vini: "Vini Jr.",
 };
 const familyOrder = ["water","earth","fire","fishy","duck","ghost","demon","king","striker","aura",
-  "dream","punk","boss","zeropoint","theburntpeanut","grim","air","seven","wick"];
+  "dream","punk","boss","zeropoint","theburntpeanut","grim","air","seven","wick","batman","pollo","vini"];
 const variantOrder = ["basic","gold","candy","galaxy","holofoil","gem","rift"];
 const variantLabels = { gold: "Gold", candy: "Gummy", galaxy: "Galaxy", holofoil: "Holofoil", gem: "Gem", rift: "Rift" };
 
