@@ -683,6 +683,14 @@
   .achievements-row {
     max-width: 500px;
     margin: 0 auto 16px;
+    text-align: center;
+  }
+  .achievements-label {
+    font-size: 12px;
+    color: var(--dim);
+    margin-bottom: 8px;
+  }
+  .achievements-badges {
     display: flex;
     justify-content: center;
     gap: 10px;
@@ -700,7 +708,7 @@
     border: 2px solid #3a3d4a;
     filter: grayscale(1);
     opacity: 0.4;
-    cursor: default;
+    cursor: pointer;
   }
   .achievement-badge.unlocked {
     background: linear-gradient(135deg, rgba(212,175,55,0.35), rgba(232,145,45,0.2));
@@ -709,19 +717,41 @@
     opacity: 1;
     box-shadow: 0 0 10px rgba(212,175,55,0.45);
   }
+  .achievement-badge.selected {
+    transform: scale(1.12);
+    border-color: #fff;
+  }
+  .achievement-detail {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #1f222a;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  .achievement-detail .achievement-detail-title {
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+  .achievement-detail.locked .achievement-detail-title {
+    color: var(--dim);
+  }
+  .achievement-detail:not(.locked) .achievement-detail-title {
+    color: var(--special);
+  }
+  .achievement-detail-desc {
+    color: var(--dim);
+  }
 
-  /* Sprite of the Day spotlight */
+  /* The One That Got Away */
   .spotlight-card {
     max-width: 420px;
     margin: 0 auto 20px;
-    background: #1f222a;
-    border: 1px solid rgba(255,255,255,0.1);
+    background: linear-gradient(135deg, rgba(212,175,55,0.16), rgba(232,145,45,0.08));
+    border: 2px solid rgba(212,175,55,0.55);
     border-radius: 12px;
-    padding: 12px 16px;
-  }
-  .spotlight-card.collected {
-    border-color: rgba(92,214,92,0.6);
-    background: rgba(92,214,92,0.08);
+    padding: 14px 16px;
+    box-shadow: 0 0 14px rgba(212,175,55,0.25);
   }
   .spotlight-label {
     font-size: 12px;
@@ -733,23 +763,30 @@
   }
   .spotlight-body {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 12px;
     justify-content: center;
+    gap: 8px;
+    text-align: center;
   }
   .spotlight-body img {
-    width: 48px;
-    height: 48px;
+    width: 64px;
+    height: 64px;
     object-fit: contain;
     background: #12141a;
-    border-radius: 8px;
+    border-radius: 10px;
   }
   .spotlight-name {
     font-weight: 700;
+    font-size: 16px;
   }
-  .spotlight-meta {
+  .spotlight-rarity-badge {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 12px;
     font-size: 12px;
-    color: var(--dim);
+    font-weight: 700;
+    border: 1px solid currentColor;
   }
   .spotlight-complete {
     text-align: center;
@@ -900,7 +937,11 @@
   <button id="userNameBadge" class="username-badge" style="display:none;" title="Click to update your name"></button>
 </div>
 
-<div class="achievements-row" id="achievementsRow" style="display:none;"></div>
+<div class="achievements-row" id="achievementsRow" style="display:none;">
+  <div class="achievements-label">🏅 Achievements &middot; tap a badge to see what it means</div>
+  <div class="achievements-badges" id="achievementsBadges"></div>
+  <div class="achievement-detail" id="achievementDetail" style="display:none;"></div>
+</div>
 
 <div class="spotlight-card" id="spotlightCard" style="display:none;"></div>
 
@@ -1232,31 +1273,60 @@ function renderAchievements() {
     row.style.display = "none";
     return;
   }
-  row.style.display = "flex";
-  row.innerHTML = "";
+  row.style.display = "block";
+  const badgesWrap = document.getElementById("achievementsBadges");
+  const detail = document.getElementById("achievementDetail");
+  badgesWrap.innerHTML = "";
+  detail.style.display = "none";
+
   ACHIEVEMENTS.forEach(a => {
     const unlocked = !!unlockedAchievements[a.id];
-    const badge = document.createElement("div");
+    const badge = document.createElement("button");
+    badge.type = "button";
     badge.className = "achievement-badge" + (unlocked ? " unlocked" : "");
     badge.textContent = a.icon;
     badge.title = unlocked ? `${a.label} — ${a.desc}` : `Locked: ${a.desc}`;
-    row.appendChild(badge);
+    badge.addEventListener("click", () => {
+      const alreadySelected = badge.classList.contains("selected");
+      badgesWrap.querySelectorAll(".achievement-badge").forEach(b => b.classList.remove("selected"));
+      if (alreadySelected) {
+        detail.style.display = "none";
+        return;
+      }
+      badge.classList.add("selected");
+      detail.classList.toggle("locked", !unlocked);
+      detail.innerHTML = "";
+      const titleEl = document.createElement("div");
+      titleEl.className = "achievement-detail-title";
+      titleEl.textContent = `${a.icon} ${a.label}${unlocked ? "" : " (locked)"}`;
+      const descEl = document.createElement("div");
+      descEl.className = "achievement-detail-desc";
+      descEl.textContent = a.desc;
+      detail.appendChild(titleEl);
+      detail.appendChild(descEl);
+      detail.style.display = "block";
+    });
+    badgesWrap.appendChild(badge);
   });
 }
 
-const SPOTLIGHT_KEY = "fortniteSpriteSpotlight";
+const RARITY_TIER_RANK = { Rare: 1, Epic: 2, Legendary: 3, Mythic: 4 };
+// Variant spawn-rate ordering (rarest to most common: Holofoil > Rift > Gem > Galaxy/Gummy > Gold)
+// per community drop-rate tracking (hotspawn.com) — Gold's spawn rate was boosted after Gummy's
+// introduction, making it the most common special variant rather than the rarest.
+const VARIANT_RARITY_BONUS = { basic: 0, gold: 1, candy: 2, galaxy: 2, gem: 3, rift: 4, holofoil: 5 };
 
-function getSpotlightSpriteId() {
-  const today = todayString();
-  const stored = JSON.parse(localStorage.getItem(SPOTLIGHT_KEY) || "null");
-  if (stored && stored.date === today && sprites.some(s => s.id === stored.spriteId)) {
-    return stored.spriteId;
-  }
+function rarityScore(sprite) {
+  const basicItem = sprites.find(s => s.family === sprite.family && s.variant === "basic");
+  const baseTier = basicItem ? (RARITY_TIER_RANK[basicItem.rarity] || 1) : 1;
+  const bonus = VARIANT_RARITY_BONUS[sprite.variant] || 0;
+  return baseTier * 10 + bonus;
+}
+
+function getRarestOutstandingSprite() {
   const outstanding = sprites.filter(s => !state[s.id]);
   if (!outstanding.length) return null;
-  const pick = outstanding[Math.floor(Math.random() * outstanding.length)];
-  localStorage.setItem(SPOTLIGHT_KEY, JSON.stringify({ date: today, spriteId: pick.id }));
-  return pick.id;
+  return outstanding.reduce((rarest, s) => rarityScore(s) > rarityScore(rarest) ? s : rarest, outstanding[0]);
 }
 
 function renderSpotlight() {
@@ -1265,47 +1335,43 @@ function renderSpotlight() {
     container.style.display = "none";
     return;
   }
-  const id = getSpotlightSpriteId();
   container.innerHTML = "";
-  container.classList.remove("collected");
-  if (!id) {
-    container.classList.add("spotlight-complete-wrap");
+  const sprite = getRarestOutstandingSprite();
+  if (!sprite) {
     const done = document.createElement("div");
     done.className = "spotlight-complete";
-    done.textContent = "🏆 You've collected everything — no target needed today!";
+    done.textContent = "🎉 Nothing got away — you've caught them all!";
     container.appendChild(done);
     container.style.display = "";
     return;
   }
-  const sprite = sprites.find(s => s.id === id);
-  const collected = !!state[id];
-  container.classList.toggle("collected", collected);
 
   const label = document.createElement("div");
   label.className = "spotlight-label";
-  label.textContent = collected ? "✅ Today's Target — Collected!" : "🎯 Today's Target";
+  label.textContent = "💔 The One That Got Away";
   container.appendChild(label);
 
   const body = document.createElement("div");
   body.className = "spotlight-body";
 
   const img = document.createElement("img");
-  img.src = IMG_BASE + id + ".png";
+  img.src = IMG_BASE + sprite.id + ".png";
   img.alt = sprite.name;
   body.appendChild(img);
 
-  const info = document.createElement("div");
   const nameEl = document.createElement("div");
   nameEl.className = "spotlight-name";
-  nameEl.textContent = sprite.name;
-  const metaEl = document.createElement("div");
-  metaEl.className = "spotlight-meta";
-  const familyLabel = familyNames[sprite.family] || sprite.family;
+  nameEl.textContent = familyNames[sprite.family] || sprite.family;
+  body.appendChild(nameEl);
+
+  const rarityEl = document.createElement("div");
   const varietyLabel = sprite.variant === "basic" ? sprite.rarity : variantLabels[sprite.variant];
-  metaEl.textContent = `${familyLabel} · ${varietyLabel}`;
-  info.appendChild(nameEl);
-  info.appendChild(metaEl);
-  body.appendChild(info);
+  const colorClass = sprite.variant === "basic" ? sprite.rarity.toLowerCase() : "special";
+  const rarityColorVar = { rare: "--rare", epic: "--epic", legendary: "--legendary", mythic: "--mythic", special: "--special" }[colorClass];
+  rarityEl.className = "spotlight-rarity-badge";
+  rarityEl.style.color = `var(${rarityColorVar})`;
+  rarityEl.textContent = varietyLabel;
+  body.appendChild(rarityEl);
 
   container.appendChild(body);
   container.style.display = "";
