@@ -209,12 +209,22 @@
   .rarity-chip-btn.epic { border: 2px solid var(--epic); }
   .rarity-chip-btn.legendary { border: 2px solid var(--legendary); }
   .rarity-chip-btn.mythic { border: 2px solid var(--mythic); }
-  .rarity-chip-btn.special { border: 2px solid var(--special); }
+  .rarity-chip-btn.gold { border: 2px solid #d4af37; }
+  .rarity-chip-btn.gummy { border: 2px solid #ec4899; }
+  .rarity-chip-btn.galaxy { border: 2px solid #6366f1; }
+  .rarity-chip-btn.holofoil { border: 2px solid #22d3ee; }
+  .rarity-chip-btn.gem { border: 2px solid #10b981; }
+  .rarity-chip-btn.cube { border: 2px solid #7c3aed; }
   .rarity-chip-btn.rare.active { background: #4a90d9; color: #fff; box-shadow: 0 0 8px rgba(74,144,217,0.6); }
   .rarity-chip-btn.epic.active { background: #a259d9; color: #fff; box-shadow: 0 0 8px rgba(162,89,217,0.6); }
   .rarity-chip-btn.legendary.active { background: #e8912d; color: #fff; box-shadow: 0 0 8px rgba(232,145,45,0.6); }
   .rarity-chip-btn.mythic.active { background: #d9534f; color: #fff; box-shadow: 0 0 8px rgba(217,83,79,0.6); }
-  .rarity-chip-btn.special.active { background: #d4af37; color: #1b1d24; box-shadow: 0 0 8px rgba(212,175,55,0.6); }
+  .rarity-chip-btn.gold.active { background: #d4af37; color: #1b1d24; box-shadow: 0 0 8px rgba(212,175,55,0.6); }
+  .rarity-chip-btn.gummy.active { background: #ec4899; color: #fff; box-shadow: 0 0 8px rgba(236,72,153,0.6); }
+  .rarity-chip-btn.galaxy.active { background: #6366f1; color: #fff; box-shadow: 0 0 8px rgba(99,102,241,0.6); }
+  .rarity-chip-btn.holofoil.active { background: #22d3ee; color: #1b1d24; box-shadow: 0 0 8px rgba(34,211,238,0.6); }
+  .rarity-chip-btn.gem.active { background: #10b981; color: #fff; box-shadow: 0 0 8px rgba(16,185,129,0.6); }
+  .rarity-chip-btn.cube.active { background: #7c3aed; color: #fff; box-shadow: 0 0 8px rgba(124,58,237,0.6); }
 
   .grid-wrap {
     max-width: 1000px;
@@ -2090,12 +2100,12 @@ const RARITY_FILTER_LABELS = [
   { label: "Epic", cls: "epic" },
   { label: "Legendary", cls: "legendary" },
   { label: "Mythic", cls: "mythic" },
-  { label: "Gold", cls: "special" },
-  { label: "Gummy", cls: "special" },
-  { label: "Galaxy", cls: "special" },
-  { label: "Holofoil", cls: "special" },
-  { label: "Gem", cls: "special" },
-  { label: "Cube", cls: "special" },
+  { label: "Gold", cls: "gold" },
+  { label: "Gummy", cls: "gummy" },
+  { label: "Galaxy", cls: "galaxy" },
+  { label: "Holofoil", cls: "holofoil" },
+  { label: "Gem", cls: "gem" },
+  { label: "Cube", cls: "cube" },
 ];
 const activeRarityLabels = new Set(RARITY_FILTER_LABELS.map(r => r.label));
 
