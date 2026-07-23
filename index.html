@@ -2226,9 +2226,7 @@ const sidebarToggle = document.getElementById("sidebarToggle");
 
 function openSidebar() {
   sidebar.classList.add("open");
-  if (window.innerWidth <= 900) {
-    sidebarBackdrop.classList.add("open");
-  }
+  sidebarBackdrop.classList.add("open");
 }
 function closeSidebar() {
   sidebar.classList.remove("open");
@@ -2240,9 +2238,7 @@ sidebarToggle.addEventListener("click", () => {
 });
 sidebarBackdrop.addEventListener("click", closeSidebar);
 
-if (window.innerWidth > 900) {
-  openSidebar();
-}
+// Sidebar stays hidden on load across all viewports — the user opens it via the ☰ toggle.
 
 const roastBadgeToggle = document.getElementById("roastBadgeToggle");
 roastBadgeToggle.addEventListener("click", (e) => {
