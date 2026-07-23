@@ -1049,6 +1049,26 @@
 <script>
 // Sprite list and image paths sourced from https://staticvacant.github.io/fnsprites/ (sprites-data.js).
 const IMG_BASE = "https://staticvacant.github.io/fnsprites/sprites/";
+// Secondary source used as an automatic fallback when the primary CDN is missing an image
+// (the two publish new-variant art out of sync — verified fnsprites.info carries the same
+// naming, except it labels the "rift" variant "_cube"). If both miss, the image hides gracefully.
+const IMG_FALLBACK_BASE = "https://fnsprites.info/spriteimg/";
+
+function fallbackImgUrl(id) {
+  return IMG_FALLBACK_BASE + id.replace(/_rift$/, "_cube") + ".png";
+}
+
+// Wires a primary->fallback->hide chain onto an <img>. Call before setting img.src.
+function wireImgFallback(img, id) {
+  img.onerror = () => {
+    if (img.dataset.triedFallback) {
+      img.style.visibility = "hidden";
+    } else {
+      img.dataset.triedFallback = "1";
+      img.src = fallbackImgUrl(id);
+    }
+  };
+}
 
 const sprites = [
     { id: "water_basic", name: "Water", family: "water", variant: "basic", rarity: "Rare" },
@@ -1365,8 +1385,9 @@ function renderSpotlight() {
   body.className = "spotlight-body";
 
   const img = document.createElement("img");
-  img.src = IMG_BASE + sprite.id + ".png";
   img.alt = sprite.name;
+  wireImgFallback(img, sprite.id);
+  img.src = IMG_BASE + sprite.id + ".png";
   body.appendChild(img);
 
   const nameEl = document.createElement("div");
@@ -1532,10 +1553,10 @@ function createVariantChip(sprite) {
   chip.dataset.name = sprite.name.toLowerCase();
 
   const img = document.createElement("img");
-  img.src = IMG_BASE + id + ".png";
   img.alt = sprite.name;
   img.loading = "lazy";
-  img.onerror = () => { img.style.visibility = "hidden"; };
+  wireImgFallback(img, id);
+  img.src = IMG_BASE + id + ".png";
 
   const label = document.createElement("span");
   label.className = "variant-label";
@@ -1599,10 +1620,10 @@ function createReadOnlyChip(sprite, collected, isMastered) {
   if (collected && isMastered) chip.classList.add("mastered");
 
   const img = document.createElement("img");
-  img.src = IMG_BASE + sprite.id + ".png";
   img.alt = sprite.name;
   img.loading = "lazy";
-  img.onerror = () => { img.style.visibility = "hidden"; };
+  wireImgFallback(img, sprite.id);
+  img.src = IMG_BASE + sprite.id + ".png";
 
   const label = document.createElement("span");
   label.className = "variant-label";
@@ -1978,10 +1999,10 @@ function buildUnreleasedView() {
       chip.className = "variant-chip unreleased";
 
       const img = document.createElement("img");
-      img.src = IMG_BASE + sprite.id + ".png";
       img.alt = sprite.name;
       img.loading = "lazy";
-      img.onerror = () => { img.style.visibility = "hidden"; };
+      wireImgFallback(img, sprite.id);
+      img.src = IMG_BASE + sprite.id + ".png";
 
       const label = document.createElement("span");
       label.className = "variant-label";
