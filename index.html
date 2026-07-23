@@ -1535,6 +1535,7 @@ function createVariantChip(sprite) {
   img.src = IMG_BASE + id + ".png";
   img.alt = sprite.name;
   img.loading = "lazy";
+  img.onerror = () => { img.style.visibility = "hidden"; };
 
   const label = document.createElement("span");
   label.className = "variant-label";
@@ -1601,6 +1602,7 @@ function createReadOnlyChip(sprite, collected, isMastered) {
   img.src = IMG_BASE + sprite.id + ".png";
   img.alt = sprite.name;
   img.loading = "lazy";
+  img.onerror = () => { img.style.visibility = "hidden"; };
 
   const label = document.createElement("span");
   label.className = "variant-label";
