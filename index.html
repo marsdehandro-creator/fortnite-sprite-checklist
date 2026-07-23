@@ -745,7 +745,7 @@
 
   /* The One That Got Away */
   .spotlight-card {
-    max-width: 420px;
+    max-width: 460px;
     margin: 0 auto 20px;
     background: linear-gradient(135deg, rgba(212,175,55,0.16), rgba(232,145,45,0.08));
     border: 2px solid rgba(212,175,55,0.55);
@@ -758,33 +758,41 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--dim);
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     text-align: center;
   }
   .spotlight-body {
     display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .spotlight-item {
+    display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
+    gap: 6px;
     text-align: center;
+    flex: 0 1 120px;
   }
-  .spotlight-body img {
-    width: 64px;
-    height: 64px;
+  .spotlight-item img {
+    width: 60px;
+    height: 60px;
     object-fit: contain;
     background: #12141a;
     border-radius: 10px;
   }
   .spotlight-name {
     font-weight: 700;
-    font-size: 16px;
+    font-size: 15px;
   }
   .spotlight-rarity-badge {
     display: inline-block;
-    padding: 3px 12px;
+    padding: 3px 10px;
     border-radius: 12px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     border: 1px solid currentColor;
   }
@@ -1353,10 +1361,11 @@ function rarityScore(sprite) {
   return baseTier * 10 + bonus;
 }
 
-function getRarestOutstandingSprite() {
-  const outstanding = sprites.filter(s => !state[s.id]);
-  if (!outstanding.length) return null;
-  return outstanding.reduce((rarest, s) => rarityScore(s) > rarityScore(rarest) ? s : rarest, outstanding[0]);
+function getRarestOutstandingSprites(n) {
+  return sprites
+    .filter(s => !state[s.id])
+    .sort((a, b) => rarityScore(b) - rarityScore(a))
+    .slice(0, n);
 }
 
 function renderSpotlight() {
@@ -1366,8 +1375,8 @@ function renderSpotlight() {
     return;
   }
   container.innerHTML = "";
-  const sprite = getRarestOutstandingSprite();
-  if (!sprite) {
+  const rarest = getRarestOutstandingSprites(3);
+  if (!rarest.length) {
     const done = document.createElement("div");
     done.className = "spotlight-complete";
     done.textContent = "🎉 Nothing got away — you've caught them all!";
@@ -1378,31 +1387,38 @@ function renderSpotlight() {
 
   const label = document.createElement("div");
   label.className = "spotlight-label";
-  label.textContent = "💔 The One That Got Away";
+  label.textContent = "💔 The Ones That Got Away";
   container.appendChild(label);
 
   const body = document.createElement("div");
   body.className = "spotlight-body";
 
-  const img = document.createElement("img");
-  img.alt = sprite.name;
-  wireImgFallback(img, sprite.id);
-  img.src = IMG_BASE + sprite.id + ".png";
-  body.appendChild(img);
+  rarest.forEach(sprite => {
+    const item = document.createElement("div");
+    item.className = "spotlight-item";
 
-  const nameEl = document.createElement("div");
-  nameEl.className = "spotlight-name";
-  nameEl.textContent = familyNames[sprite.family] || sprite.family;
-  body.appendChild(nameEl);
+    const img = document.createElement("img");
+    img.alt = sprite.name;
+    wireImgFallback(img, sprite.id);
+    img.src = IMG_BASE + sprite.id + ".png";
+    item.appendChild(img);
 
-  const rarityEl = document.createElement("div");
-  const varietyLabel = sprite.variant === "basic" ? sprite.rarity : variantLabels[sprite.variant];
-  const colorClass = sprite.variant === "basic" ? sprite.rarity.toLowerCase() : "special";
-  const rarityColorVar = { rare: "--rare", epic: "--epic", legendary: "--legendary", mythic: "--mythic", special: "--special" }[colorClass];
-  rarityEl.className = "spotlight-rarity-badge";
-  rarityEl.style.color = `var(${rarityColorVar})`;
-  rarityEl.textContent = varietyLabel;
-  body.appendChild(rarityEl);
+    const nameEl = document.createElement("div");
+    nameEl.className = "spotlight-name";
+    nameEl.textContent = familyNames[sprite.family] || sprite.family;
+    item.appendChild(nameEl);
+
+    const rarityEl = document.createElement("div");
+    const varietyLabel = sprite.variant === "basic" ? sprite.rarity : variantLabels[sprite.variant];
+    const colorClass = sprite.variant === "basic" ? sprite.rarity.toLowerCase() : "special";
+    const rarityColorVar = { rare: "--rare", epic: "--epic", legendary: "--legendary", mythic: "--mythic", special: "--special" }[colorClass];
+    rarityEl.className = "spotlight-rarity-badge";
+    rarityEl.style.color = `var(${rarityColorVar})`;
+    rarityEl.textContent = varietyLabel;
+    item.appendChild(rarityEl);
+
+    body.appendChild(item);
+  });
 
   container.appendChild(body);
   container.style.display = "";
