@@ -215,6 +215,7 @@
   .rarity-chip-btn.holofoil { border: 2px solid #22d3ee; }
   .rarity-chip-btn.gem { border: 2px solid #10b981; }
   .rarity-chip-btn.cube { border: 2px solid #7c3aed; }
+  .rarity-chip-btn.quack { border: 2px solid #f5c518; }
   .rarity-chip-btn.rare.active { background: #4a90d9; color: #fff; box-shadow: 0 0 8px rgba(74,144,217,0.6); }
   .rarity-chip-btn.epic.active { background: #a259d9; color: #fff; box-shadow: 0 0 8px rgba(162,89,217,0.6); }
   .rarity-chip-btn.legendary.active { background: #e8912d; color: #fff; box-shadow: 0 0 8px rgba(232,145,45,0.6); }
@@ -225,6 +226,7 @@
   .rarity-chip-btn.holofoil.active { background: #22d3ee; color: #1b1d24; box-shadow: 0 0 8px rgba(34,211,238,0.6); }
   .rarity-chip-btn.gem.active { background: #10b981; color: #fff; box-shadow: 0 0 8px rgba(16,185,129,0.6); }
   .rarity-chip-btn.cube.active { background: #7c3aed; color: #fff; box-shadow: 0 0 8px rgba(124,58,237,0.6); }
+  .rarity-chip-btn.quack.active { background: #f5c518; color: #1b1d24; box-shadow: 0 0 8px rgba(245,197,24,0.6); }
 
   .grid-wrap {
     max-width: 1000px;
@@ -1259,8 +1261,8 @@ const familyNames = {
 const familyOrder = ["water","earth","fire","fishy","duck","ghost","demon","king","striker","aura",
   "dream","punk","boss","zeropoint","theburntpeanut","grim","air","seven","wick","batman","pollo","vini",
   "llama","peely","ironmouse"];
-const variantOrder = ["basic","gold","candy","galaxy","holofoil","gem","rift"];
-const variantLabels = { gold: "Gold", candy: "Gummy", galaxy: "Galaxy", holofoil: "Holofoil", gem: "Gem", rift: "Cube" };
+const variantOrder = ["basic","gold","candy","galaxy","holofoil","gem","rift","quack"];
+const variantLabels = { gold: "Gold", candy: "Gummy", galaxy: "Galaxy", holofoil: "Holofoil", gem: "Gem", rift: "Cube", quack: "Quack" };
 
 const STORAGE_KEY = "fortniteSpriteChecklist";
 let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
@@ -2127,6 +2129,7 @@ const RARITY_FILTER_LABELS = [
   { label: "Holofoil", cls: "holofoil" },
   { label: "Gem", cls: "gem" },
   { label: "Cube", cls: "cube" },
+  { label: "Quack", cls: "quack" },
 ];
 const activeRarityLabels = new Set(RARITY_FILTER_LABELS.map(r => r.label));
 
