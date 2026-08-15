@@ -1418,7 +1418,7 @@ function renderSpotlight() {
     return;
   }
   container.innerHTML = "";
-  const rarest = getRarestOutstandingSprites(3);
+  const rarest = getRarestOutstandingSprites(6);
   if (!rarest.length) {
     const done = document.createElement("div");
     done.className = "spotlight-complete";
