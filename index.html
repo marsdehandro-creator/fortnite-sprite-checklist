@@ -942,6 +942,83 @@
     .powerhour-status { margin-left: 62px; }
   }
 
+  /* Fortnite News feed */
+  .news-wrap {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .news-note {
+    color: var(--dim);
+    font-size: 13px;
+    text-align: center;
+    margin: 0 0 16px;
+  }
+  .news-note strong {
+    color: var(--epic);
+  }
+  .news-board {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .news-item {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-left: 4px solid var(--special);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .news-item.leak {
+    border-left-color: var(--epic);
+  }
+  .news-item-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .news-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 3px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+  }
+  .news-badge.official { background: rgba(212,175,55,0.2); color: var(--special); }
+  .news-badge.leak { background: rgba(162,89,217,0.22); color: var(--epic); }
+  .news-badge.new-tag { background: rgba(217,83,79,0.22); color: var(--mythic); }
+  .news-meta {
+    color: var(--dim);
+    font-size: 11px;
+  }
+  .news-title {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+  .news-summary {
+    font-size: 13px;
+    color: var(--text);
+    opacity: 0.9;
+    line-height: 1.4;
+    margin-bottom: 6px;
+  }
+  .news-source-link {
+    font-size: 12px;
+    color: var(--rare);
+    text-decoration: none;
+  }
+  .news-source-link:hover {
+    text-decoration: underline;
+  }
+  .news-empty {
+    text-align: center;
+    color: var(--dim);
+    padding: 20px;
+  }
+
   /* Friends tab */
   .friends-note {
     max-width: 1000px;
@@ -1040,6 +1117,7 @@
   <button id="tabFriends" class="sidebar-nav-btn">Friends</button>
   <button id="tabGame" class="sidebar-nav-btn">🎮 Sprite Runner</button>
   <button id="tabPowerHour" class="sidebar-nav-btn">⚡ Power Hour</button>
+  <button id="tabNews" class="sidebar-nav-btn">📰 Fortnite News</button>
   <div class="sidebar-divider"></div>
   <button id="shareProgressBtn" class="sidebar-share-btn">🔗 Share My Progress</button>
 </nav>
@@ -1124,6 +1202,11 @@
   <div class="powerhour-note">All times shown in South African Standard Time (SAST, UTC+2). This board updates live — finished events get struck through automatically, no refresh needed.</div>
   <div class="powerhour-board" id="powerHourBoard"></div>
   <div class="powerhour-footer-note">Schedule covers Sprite Spree Week (15–20 Aug 2026) through the start of Chapter 7 Season 4 "Override."</div>
+</div>
+
+<div class="news-wrap" id="newsView" style="display:none;">
+  <div class="news-note">Mix of Epic's official announcements and dataminer/leak reporting, refreshed weekly. <strong>LEAK</strong> items are unconfirmed rumors until Epic announces them officially.</div>
+  <div class="news-board" id="newsBoard"></div>
 </div>
 </div>
 
@@ -1697,6 +1780,124 @@ function renderPowerHour() {
 }
 
 setInterval(renderPowerHour, 60000);
+
+// Fortnite News feed — mix of official Epic announcements and dataminer/leak reporting.
+// Populated 2026-08-16 from Vice, Gamerant, TalkEsport and TechTimes coverage; refreshed weekly
+// by the weekly-fortnite-news-sync scheduled task, which prepends new items and prunes old ones.
+// Each summary is an original paraphrase, not a reproduction of source text.
+const NEWS_ITEMS = [
+  {
+    date: "2026-08-16",
+    category: "official",
+    title: 'Chapter 7 Season 4 "Override" confirmed for August 20',
+    summary: "Epic locked in the launch date for the next season, themed around classic gaming icons, arriving right after Sprite Spree Week wraps up.",
+    source: "Epic Games / Vice",
+    url: "https://www.vice.com/en/article/fortnite-chapter-7-season-4-override-release-date-confirmed/",
+  },
+  {
+    date: "2026-08-15",
+    category: "official",
+    title: '"Unstable" live event closes out Season 3: Runners',
+    summary: "Epic ran a send-off live event for the current season on August 15, ahead of the Override launch.",
+    source: "Epic Games",
+    url: "https://www.vice.com/en/article/fortnite-chapter-7-season-4-override-release-date-confirmed/",
+  },
+  {
+    date: "2026-08-14",
+    category: "leak",
+    title: "Dataminers pull full Gaming Legends collab roster from v41.30 files",
+    summary: "HYPEX and ShiinaBR say encrypted game files name Sonic the Hedgehog, Dr. Eggman, Persona 5's Joker, Mega Man, Pac-Man and Tetris as Season 4 collabs.",
+    source: "HYPEX / ShiinaBR",
+    url: "https://www.techtimes.com/articles/322190/20260730/fortnite-gaming-legends-season-leak-names-sonic-joker-mega-man-v4130-files.htm",
+  },
+  {
+    date: "2026-08-13",
+    category: "leak",
+    title: "Leaked gift-basket card shows 6 of 8 Override Battle Pass skins",
+    summary: "Streamers who received early Epic gift baskets shared a card reportedly revealing most of the new pass, headlined by a Sonic skin.",
+    source: "Littlest Snail Gaming",
+    url: "https://gamerant.com/fortnite-override-chapter-7-season-4-all-collabs-confirmed-sonic-tetris/",
+  },
+  {
+    date: "2026-08-12",
+    category: "leak",
+    title: "Rumored (unconfirmed) collabs floated beyond the leaked roster",
+    summary: "Some leakers are additionally pointing to Kingdom Hearts, Crash Bandicoot and Spyro as possible Override tie-ins — treat as lower-confidence than the v41.30 file findings above.",
+    source: "Community leak roundups",
+    url: "https://www.talkesport.com/news/fortnite/fortnite-chapter-7-season-4-leaks-override-collaborations/",
+  },
+];
+
+function timeAgoLabel(dateStr) {
+  const days = Math.floor((Date.now() - new Date(dateStr + "T00:00:00Z").getTime()) / 86400000);
+  if (days <= 0) return "today";
+  if (days === 1) return "1 day ago";
+  return `${days} days ago`;
+}
+
+function renderNews() {
+  const board = document.getElementById("newsBoard");
+  if (!board) return;
+  board.innerHTML = "";
+
+  if (!NEWS_ITEMS.length) {
+    const empty = document.createElement("div");
+    empty.className = "news-empty";
+    empty.textContent = "No news posted yet — check back soon.";
+    board.appendChild(empty);
+    return;
+  }
+
+  const sorted = [...NEWS_ITEMS].sort((a, b) => b.date.localeCompare(a.date));
+
+  sorted.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "news-item" + (item.category === "leak" ? " leak" : "");
+
+    const header = document.createElement("div");
+    header.className = "news-item-header";
+
+    const badge = document.createElement("span");
+    badge.className = "news-badge " + (item.category === "leak" ? "leak" : "official");
+    badge.textContent = item.category === "leak" ? "🔮 LEAK" : "✅ OFFICIAL";
+    header.appendChild(badge);
+
+    const isNew = (Date.now() - new Date(item.date + "T00:00:00Z").getTime()) < 3 * 86400000;
+    if (isNew) {
+      const newBadge = document.createElement("span");
+      newBadge.className = "news-badge new-tag";
+      newBadge.textContent = "NEW";
+      header.appendChild(newBadge);
+    }
+
+    const meta = document.createElement("span");
+    meta.className = "news-meta";
+    meta.textContent = `${item.date} · ${timeAgoLabel(item.date)}`;
+    header.appendChild(meta);
+
+    card.appendChild(header);
+
+    const title = document.createElement("div");
+    title.className = "news-title";
+    title.textContent = item.title;
+    card.appendChild(title);
+
+    const summary = document.createElement("div");
+    summary.className = "news-summary";
+    summary.textContent = item.summary;
+    card.appendChild(summary);
+
+    const link = document.createElement("a");
+    link.className = "news-source-link";
+    link.href = item.url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = `Source: ${item.source} →`;
+    card.appendChild(link);
+
+    board.appendChild(card);
+  });
+}
 
 const DAILY_MESSAGE_KEY = "fortniteSpriteDailyMessage";
 const ROAST_MESSAGES = [
@@ -2444,12 +2645,14 @@ const tabMastered = document.getElementById("tabMastered");
 const tabFriends = document.getElementById("tabFriends");
 const tabGame = document.getElementById("tabGame");
 const tabPowerHour = document.getElementById("tabPowerHour");
+const tabNews = document.getElementById("tabNews");
 const releasedView = document.getElementById("releasedView");
 const unreleasedView = document.getElementById("unreleasedView");
 const masteredView = document.getElementById("masteredView");
 const friendsView = document.getElementById("friendsView");
 const gameView = document.getElementById("gameView");
 const powerHourView = document.getElementById("powerHourView");
+const newsView = document.getElementById("newsView");
 const progressWrap = document.getElementById("progressWrap");
 const controls = document.getElementById("controls");
 const rarityFilters = document.getElementById("rarityFilters");
@@ -2461,8 +2664,8 @@ const friendsControls = document.getElementById("friendsControls");
 const achievementsRow = document.getElementById("achievementsRow");
 const spotlightCard = document.getElementById("spotlightCard");
 
-const allTabs = [tabReleased, tabUnreleased, tabMastered, tabFriends, tabGame, tabPowerHour];
-const allViews = [releasedView, unreleasedView, masteredView, friendsView, gameView, powerHourView];
+const allTabs = [tabReleased, tabUnreleased, tabMastered, tabFriends, tabGame, tabPowerHour, tabNews];
+const allViews = [releasedView, unreleasedView, masteredView, friendsView, gameView, powerHourView, newsView];
 
 const tabConfig = {
   [tabReleased.id]: { tab: tabReleased, view: releasedView, progressWrap: true, controls: true, rarityFilters: true, achievementsRow: true, spotlightCard: true },
@@ -2471,6 +2674,7 @@ const tabConfig = {
   [tabFriends.id]: { tab: tabFriends, view: friendsView, friendsNote: true, friendsControls: true },
   [tabGame.id]: { tab: tabGame, view: gameView },
   [tabPowerHour.id]: { tab: tabPowerHour, view: powerHourView, powerHour: true },
+  [tabNews.id]: { tab: tabNews, view: newsView, news: true },
 };
 
 function activateTab(tabEl) {
@@ -2490,6 +2694,7 @@ function activateTab(tabEl) {
   if (cfg.achievementsRow) { renderAchievements(); } else { achievementsRow.style.display = "none"; }
   if (cfg.spotlightCard) { renderSpotlight(); } else { spotlightCard.style.display = "none"; }
   if (cfg.powerHour) { renderPowerHour(); }
+  if (cfg.news) { renderNews(); }
 }
 
 allTabs.forEach(tabEl => {
@@ -2773,6 +2978,7 @@ updateProgress();
 updateFilterCounts();
 applyFilters();
 renderPowerHour();
+renderNews();
 
 let isEditingName = false;
 
