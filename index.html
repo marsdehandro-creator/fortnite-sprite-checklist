@@ -841,6 +841,107 @@
     margin: 10px 0;
   }
 
+  /* Sprite Power Hour bulletin board */
+  .powerhour-wrap {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .powerhour-note {
+    color: var(--dim);
+    font-size: 13px;
+    text-align: center;
+    margin: 0 0 16px;
+  }
+  .powerhour-board {
+    background: linear-gradient(180deg, rgba(212,175,55,0.12), rgba(27,29,36,0.4) 45%);
+    border: 2px solid rgba(212,175,55,0.4);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .powerhour-event {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-left: 4px solid var(--special);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .powerhour-event.is-live {
+    border-left-color: var(--mythic);
+    box-shadow: 0 0 12px rgba(217,83,79,0.35);
+  }
+  .powerhour-event.is-done {
+    opacity: 0.55;
+  }
+  .powerhour-event.is-done .powerhour-title,
+  .powerhour-event.is-done .powerhour-time {
+    text-decoration: line-through;
+    text-decoration-color: var(--mythic);
+    text-decoration-thickness: 2px;
+  }
+  .powerhour-icons {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .powerhour-icons img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    background: #12141a;
+    border-radius: 8px;
+  }
+  .powerhour-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .powerhour-title {
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .powerhour-time {
+    color: var(--dim);
+    font-size: 13px;
+    margin-top: 2px;
+  }
+  .powerhour-desc {
+    font-size: 12px;
+    color: var(--dim);
+    margin-top: 4px;
+  }
+  .powerhour-status {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+  .powerhour-status.upcoming { background: rgba(74,144,217,0.18); color: var(--rare); }
+  .powerhour-status.live { background: rgba(217,83,79,0.22); color: var(--mythic); animation: powerhourPulse 1.4s ease-in-out infinite; }
+  .powerhour-status.done { background: rgba(255,255,255,0.08); color: var(--dim); }
+  @keyframes powerhourPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+  .powerhour-footer-note {
+    text-align: center;
+    color: var(--dim);
+    font-size: 12px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(255,255,255,0.12);
+  }
+  @media (max-width: 480px) {
+    .powerhour-event { flex-wrap: wrap; }
+    .powerhour-status { margin-left: 62px; }
+  }
+
   /* Friends tab */
   .friends-note {
     max-width: 1000px;
@@ -938,6 +1039,7 @@
   <button id="tabMastered" class="sidebar-nav-btn">Mastered</button>
   <button id="tabFriends" class="sidebar-nav-btn">Friends</button>
   <button id="tabGame" class="sidebar-nav-btn">🎮 Sprite Runner</button>
+  <button id="tabPowerHour" class="sidebar-nav-btn">⚡ Power Hour</button>
   <div class="sidebar-divider"></div>
   <button id="shareProgressBtn" class="sidebar-share-btn">🔗 Share My Progress</button>
 </nav>
@@ -1016,6 +1118,12 @@
   <canvas id="gameCanvas" width="760" height="260"></canvas>
   <div class="game-hint">Press Space, click, or tap the canvas to jump.</div>
   <button id="gameStartBtn">▶ Start</button>
+</div>
+
+<div class="powerhour-wrap" id="powerHourView" style="display:none;">
+  <div class="powerhour-note">All times shown in South African Standard Time (SAST, UTC+2). This board updates live — finished events get struck through automatically, no refresh needed.</div>
+  <div class="powerhour-board" id="powerHourBoard"></div>
+  <div class="powerhour-footer-note">Schedule covers Sprite Spree Week (15–20 Aug 2026) through the start of Chapter 7 Season 4 "Override."</div>
 </div>
 </div>
 
@@ -1466,6 +1574,129 @@ function renderSpotlight() {
   container.appendChild(body);
   container.style.display = "";
 }
+
+// Sprite Power Hour schedule for Sprite Spree Week (15-20 Aug 2026), sourced from
+// Epic Games event coverage (theclick.gg, vice.com, gamerant.com) cross-checked on 2026-08-16.
+// Times are stored as fixed UTC instants and rendered in SAST (UTC+2, no DST) below —
+// deliberately NOT read from the visitor's local clock, so the board reads the same in-game time everywhere.
+const POWER_HOUR_EVENTS = [
+  {
+    title: "Mythic Sprite Power Hour",
+    desc: "Boosted spawn rates for Zero Point and Grim Sprites",
+    icons: ["zeropoint_basic", "grim_basic"],
+    startUTC: "2026-08-15T18:00:00Z",
+    endUTC: "2026-08-15T20:00:00Z",
+  },
+  {
+    title: "Mythic Sprite Power Hour",
+    desc: "Boosted spawn rates for Zero Point and Grim Sprites",
+    icons: ["zeropoint_basic", "grim_basic"],
+    startUTC: "2026-08-16T01:00:00Z",
+    endUTC: "2026-08-16T03:00:00Z",
+  },
+  {
+    title: "Galaxy Sprite Hours",
+    desc: "24-hour boosted spawn rate for Galaxy-variant Sprites",
+    icons: ["zeropoint_galaxy"],
+    startUTC: "2026-08-16T13:00:00Z",
+    endUTC: "2026-08-17T13:00:00Z",
+  },
+  {
+    title: "Holofoil Sprite Hours",
+    desc: "24-hour boosted spawn rate for Holofoil-variant Sprites",
+    icons: ["zeropoint_holofoil"],
+    startUTC: "2026-08-17T13:00:00Z",
+    endUTC: "2026-08-18T13:00:00Z",
+  },
+  {
+    title: "Cube Sprite Hours",
+    desc: "24-hour boosted spawn rate for Cube-variant Sprites",
+    icons: ["zeropoint_rift"],
+    startUTC: "2026-08-18T13:00:00Z",
+    endUTC: "2026-08-19T13:00:00Z",
+  },
+  {
+    title: "Gem Sprite Hours",
+    desc: "24-hour boosted spawn rate for Gem-variant Sprites — final Power Hour before Season 4 begins",
+    icons: ["zeropoint_gem"],
+    startUTC: "2026-08-19T13:00:00Z",
+    endUTC: "2026-08-20T13:00:00Z",
+  },
+];
+
+const SAST_OFFSET_MS = 2 * 60 * 60 * 1000; // UTC+2, South Africa has no DST
+const SAST_DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const SAST_MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function formatSAST(iso) {
+  const shifted = new Date(new Date(iso).getTime() + SAST_OFFSET_MS);
+  const day = SAST_DAY_NAMES[shifted.getUTCDay()];
+  const date = shifted.getUTCDate();
+  const month = SAST_MONTH_NAMES[shifted.getUTCMonth()];
+  let hours = shifted.getUTCHours();
+  const minutes = shifted.getUTCMinutes().toString().padStart(2, "0");
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12;
+  if (hours === 0) hours = 12;
+  return `${day}, ${date} ${month} · ${hours}:${minutes} ${ampm} SAST`;
+}
+
+function renderPowerHour() {
+  const board = document.getElementById("powerHourBoard");
+  if (!board) return;
+  const now = Date.now();
+  board.innerHTML = "";
+
+  POWER_HOUR_EVENTS.forEach(ev => {
+    const start = new Date(ev.startUTC).getTime();
+    const end = new Date(ev.endUTC).getTime();
+    const isDone = now >= end;
+    const isLive = !isDone && now >= start;
+
+    const card = document.createElement("div");
+    card.className = "powerhour-event" + (isDone ? " is-done" : "") + (isLive ? " is-live" : "");
+
+    const icons = document.createElement("div");
+    icons.className = "powerhour-icons";
+    ev.icons.forEach(id => {
+      const img = document.createElement("img");
+      img.alt = id;
+      wireImgFallback(img, id);
+      img.src = IMG_BASE + id + ".png";
+      icons.appendChild(img);
+    });
+    card.appendChild(icons);
+
+    const body = document.createElement("div");
+    body.className = "powerhour-body";
+
+    const title = document.createElement("div");
+    title.className = "powerhour-title";
+    title.textContent = ev.title;
+    body.appendChild(title);
+
+    const time = document.createElement("div");
+    time.className = "powerhour-time";
+    time.textContent = `${formatSAST(ev.startUTC)} – ${formatSAST(ev.endUTC)}`;
+    body.appendChild(time);
+
+    const desc = document.createElement("div");
+    desc.className = "powerhour-desc";
+    desc.textContent = ev.desc;
+    body.appendChild(desc);
+
+    card.appendChild(body);
+
+    const status = document.createElement("div");
+    status.className = "powerhour-status " + (isDone ? "done" : isLive ? "live" : "upcoming");
+    status.textContent = isDone ? "✅ Done" : isLive ? "🔴 Live Now" : "⏳ Upcoming";
+    card.appendChild(status);
+
+    board.appendChild(card);
+  });
+}
+
+setInterval(renderPowerHour, 60000);
 
 const DAILY_MESSAGE_KEY = "fortniteSpriteDailyMessage";
 const ROAST_MESSAGES = [
@@ -2212,11 +2443,13 @@ const tabUnreleased = document.getElementById("tabUnreleased");
 const tabMastered = document.getElementById("tabMastered");
 const tabFriends = document.getElementById("tabFriends");
 const tabGame = document.getElementById("tabGame");
+const tabPowerHour = document.getElementById("tabPowerHour");
 const releasedView = document.getElementById("releasedView");
 const unreleasedView = document.getElementById("unreleasedView");
 const masteredView = document.getElementById("masteredView");
 const friendsView = document.getElementById("friendsView");
 const gameView = document.getElementById("gameView");
+const powerHourView = document.getElementById("powerHourView");
 const progressWrap = document.getElementById("progressWrap");
 const controls = document.getElementById("controls");
 const rarityFilters = document.getElementById("rarityFilters");
@@ -2228,8 +2461,8 @@ const friendsControls = document.getElementById("friendsControls");
 const achievementsRow = document.getElementById("achievementsRow");
 const spotlightCard = document.getElementById("spotlightCard");
 
-const allTabs = [tabReleased, tabUnreleased, tabMastered, tabFriends, tabGame];
-const allViews = [releasedView, unreleasedView, masteredView, friendsView, gameView];
+const allTabs = [tabReleased, tabUnreleased, tabMastered, tabFriends, tabGame, tabPowerHour];
+const allViews = [releasedView, unreleasedView, masteredView, friendsView, gameView, powerHourView];
 
 const tabConfig = {
   [tabReleased.id]: { tab: tabReleased, view: releasedView, progressWrap: true, controls: true, rarityFilters: true, achievementsRow: true, spotlightCard: true },
@@ -2237,6 +2470,7 @@ const tabConfig = {
   [tabMastered.id]: { tab: tabMastered, view: masteredView, masteredNote: true, masteredTotalCounter: true },
   [tabFriends.id]: { tab: tabFriends, view: friendsView, friendsNote: true, friendsControls: true },
   [tabGame.id]: { tab: tabGame, view: gameView },
+  [tabPowerHour.id]: { tab: tabPowerHour, view: powerHourView, powerHour: true },
 };
 
 function activateTab(tabEl) {
@@ -2255,6 +2489,7 @@ function activateTab(tabEl) {
   friendsControls.style.display = cfg.friendsControls ? "" : "none";
   if (cfg.achievementsRow) { renderAchievements(); } else { achievementsRow.style.display = "none"; }
   if (cfg.spotlightCard) { renderSpotlight(); } else { spotlightCard.style.display = "none"; }
+  if (cfg.powerHour) { renderPowerHour(); }
 }
 
 allTabs.forEach(tabEl => {
@@ -2537,6 +2772,7 @@ initSpriteRunner();
 updateProgress();
 updateFilterCounts();
 applyFilters();
+renderPowerHour();
 
 let isEditingName = false;
 
