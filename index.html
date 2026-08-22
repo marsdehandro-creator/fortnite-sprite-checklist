@@ -114,21 +114,58 @@
     background: var(--rare);
     color: #fff;
   }
-  .sidebar-divider {
-    height: 1px;
-    background: rgba(255,255,255,0.1);
-    margin: 8px 0;
+  .sprites-page-heading {
+    max-width: 1000px;
+    margin: 0 auto 8px;
+    text-align: center;
+    font-size: 22px;
+    background: linear-gradient(90deg, var(--rare), var(--epic), var(--legendary), var(--mythic));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
-  .sidebar-share-btn {
-    background: linear-gradient(90deg, var(--rare), var(--epic), var(--legendary));
-    color: #fff;
-    font-weight: 700;
+  .sprites-toggle-bar {
+    max-width: 1000px;
+    margin: 0 auto 16px;
+    display: flex;
+    justify-content: center;
+    gap: 0;
     border-radius: 8px;
-    padding: 10px 14px;
-    box-shadow: 0 0 14px rgba(162,89,217,0.35);
+    overflow: hidden;
+    border: 1px solid #444;
+    width: fit-content;
   }
-  .sidebar-share-btn:hover {
-    filter: brightness(1.1);
+  .sprites-toggle-btn {
+    padding: 8px 24px;
+    border: none;
+    background: #262932;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .sprites-toggle-btn.active {
+    background: var(--rare);
+    color: #fff;
+  }
+  .grid-wrap-outer {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .captured-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .mastered-sticker {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(212,175,55,0.9), rgba(232,145,45,0.9));
+    color: #1b1d24;
+    white-space: nowrap;
   }
 
   .progress-wrap {
@@ -414,25 +451,7 @@
     100% { background-position: 0% 50%; }
   }
 
-  /* Unreleased tab */
-  .unreleased-note {
-    max-width: 1000px;
-    margin: 0 auto 20px;
-    text-align: center;
-    color: var(--dim);
-    font-size: 14px;
-  }
-  .variant-chip.unreleased {
-    cursor: default;
-    opacity: 0.85;
-  }
-  .variant-chip.unreleased img {
-    filter: grayscale(1) brightness(0.55);
-  }
-  .variant-chip.unreleased .variant-label {
-    color: var(--dim);
-  }
-  /* Mastered tab */
+  /* Captured catalogue */
   .mastered-note {
     max-width: 1000px;
     margin: 0 auto 8px;
@@ -466,37 +485,10 @@
     0% { background-position: 0% 50%; }
     100% { background-position: 300% 50%; }
   }
-  .mastered-split {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-  .mastered-col h3 {
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin: 0 0 10px;
-    color: var(--dim);
-  }
-  .mastered-col.not-mastered h3 { color: #b5786f; }
-  .mastered-col.is-mastered h3 { color: #e8c14a; }
-  .mastered-col .variant-strip {
-    min-height: 40px;
-  }
-  .mastered-col .variant-strip:empty::after {
-    content: "—";
-    color: var(--dim);
-    font-size: 13px;
-  }
   #masteredView .family-card {
     background-color: rgba(0, 0, 0, 0.32);
     border-color: rgba(255, 255, 255, 0.06);
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.6), inset 0 0 32px rgba(0, 0, 0, 0.3);
-  }
-  @media (max-width: 640px) {
-    .mastered-split {
-      grid-template-columns: 1fr;
-    }
   }
 
 
@@ -543,26 +535,6 @@
     width: 100%;
     margin-bottom: 16px;
   }
-  .import-mode-options {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  .import-mode-option {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    font-size: 13px;
-    cursor: pointer;
-    background: #12141a;
-    border: 1px solid #333;
-    border-radius: 8px;
-    padding: 10px;
-  }
-  .import-mode-option input {
-    margin-top: 3px;
-  }
   .modal-actions {
     display: flex;
     justify-content: flex-end;
@@ -572,21 +544,6 @@
     background: var(--special);
     color: #1b1d24;
     font-weight: 700;
-  }
-  .share-link-display {
-    display: block;
-    word-break: break-all;
-    background: #12141a;
-    border: 1px solid rgba(212,175,55,0.4);
-    border-radius: 8px;
-    padding: 12px;
-    margin-bottom: 18px;
-    color: #6fb3ff;
-    text-decoration: underline;
-    font-size: 13px;
-  }
-  .share-link-display:hover {
-    color: #9ccbff;
   }
 
   .roast-badge-wrap {
@@ -815,133 +772,6 @@
   }
 
   /* Sprite Runner game */
-  .game-wrap {
-    max-width: 780px;
-    margin: 0 auto;
-    text-align: center;
-  }
-  .game-header {
-    display: flex;
-    justify-content: space-between;
-    max-width: 760px;
-    margin: 0 auto 8px;
-    font-weight: 700;
-    font-size: 15px;
-  }
-  #gameCanvas {
-    background: #12141a;
-    border: 2px solid #444;
-    border-radius: 10px;
-    max-width: 100%;
-    touch-action: manipulation;
-  }
-  .game-hint {
-    color: var(--dim);
-    font-size: 13px;
-    margin: 10px 0;
-  }
-
-  /* Sprite Power Hour bulletin board */
-  .powerhour-wrap {
-    max-width: 700px;
-    margin: 0 auto;
-  }
-  .powerhour-note {
-    color: var(--dim);
-    font-size: 13px;
-    text-align: center;
-    margin: 0 0 16px;
-  }
-  .powerhour-board {
-    background: linear-gradient(180deg, rgba(212,175,55,0.12), rgba(27,29,36,0.4) 45%);
-    border: 2px solid rgba(212,175,55,0.4);
-    border-radius: 14px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .powerhour-event {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    background: var(--card);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-left: 4px solid var(--special);
-    border-radius: 10px;
-    padding: 12px 14px;
-  }
-  .powerhour-event.is-live {
-    border-left-color: var(--mythic);
-    box-shadow: 0 0 12px rgba(217,83,79,0.35);
-  }
-  .powerhour-event.is-done {
-    opacity: 0.55;
-  }
-  .powerhour-event.is-done .powerhour-title,
-  .powerhour-event.is-done .powerhour-time {
-    text-decoration: line-through;
-    text-decoration-color: var(--mythic);
-    text-decoration-thickness: 2px;
-  }
-  .powerhour-icons {
-    display: flex;
-    gap: 4px;
-    flex-shrink: 0;
-  }
-  .powerhour-icons img {
-    width: 48px;
-    height: 48px;
-    object-fit: contain;
-    background: #12141a;
-    border-radius: 8px;
-  }
-  .powerhour-body {
-    flex: 1;
-    min-width: 0;
-  }
-  .powerhour-title {
-    font-weight: 700;
-    font-size: 15px;
-  }
-  .powerhour-time {
-    color: var(--dim);
-    font-size: 13px;
-    margin-top: 2px;
-  }
-  .powerhour-desc {
-    font-size: 12px;
-    color: var(--dim);
-    margin-top: 4px;
-  }
-  .powerhour-status {
-    flex-shrink: 0;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 12px;
-    white-space: nowrap;
-  }
-  .powerhour-status.upcoming { background: rgba(74,144,217,0.18); color: var(--rare); }
-  .powerhour-status.live { background: rgba(217,83,79,0.22); color: var(--mythic); animation: powerhourPulse 1.4s ease-in-out infinite; }
-  .powerhour-status.done { background: rgba(255,255,255,0.08); color: var(--dim); }
-  @keyframes powerhourPulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.55; }
-  }
-  .powerhour-footer-note {
-    text-align: center;
-    color: var(--dim);
-    font-size: 12px;
-    margin-top: 14px;
-    padding-top: 12px;
-    border-top: 1px dashed rgba(255,255,255,0.12);
-  }
-  @media (max-width: 480px) {
-    .powerhour-event { flex-wrap: wrap; }
-    .powerhour-status { margin-left: 62px; }
-  }
-
   /* Fortnite News feed */
   .news-wrap {
     max-width: 700px;
@@ -1019,65 +849,6 @@
     padding: 20px;
   }
 
-  /* Friends tab */
-  .friends-note {
-    max-width: 1000px;
-    margin: 0 auto 12px;
-    text-align: center;
-    color: var(--dim);
-    font-size: 14px;
-  }
-  .friends-controls {
-    max-width: 1000px;
-    margin: 0 auto 20px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
-    align-items: center;
-  }
-  .friends-controls select {
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid #444;
-    background: #12141a;
-    color: var(--text);
-  }
-  .friends-import-manual {
-    display: flex;
-    gap: 8px;
-  }
-  .friends-import-manual input {
-    min-width: 240px;
-  }
-  .friends-empty {
-    max-width: 600px;
-    margin: 40px auto;
-    text-align: center;
-    color: var(--dim);
-    font-size: 15px;
-  }
-  .friends-summary {
-    max-width: 1000px;
-    margin: 0 auto 16px;
-    text-align: center;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--special);
-  }
-  #friendsView .variant-chip.readonly {
-    cursor: default;
-  }
-  .coming-soon-badge {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    font-size: 9px;
-    background: #444;
-    color: #ccc;
-    border-radius: 4px;
-    padding: 1px 4px;
-  }
   #spriteRain {
     position: fixed;
     inset: 0;
@@ -1111,15 +882,8 @@
 <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
 <nav id="sidebar" class="sidebar">
   <div class="sidebar-header">Menu</div>
-  <button id="tabReleased" class="sidebar-nav-btn active">Released</button>
-  <button id="tabUnreleased" class="sidebar-nav-btn">Unreleased</button>
-  <button id="tabMastered" class="sidebar-nav-btn">Mastered</button>
-  <button id="tabFriends" class="sidebar-nav-btn">Friends</button>
-  <button id="tabGame" class="sidebar-nav-btn">🎮 Sprite Runner</button>
-  <button id="tabPowerHour" class="sidebar-nav-btn">⚡ Power Hour</button>
+  <button id="tabSprites" class="sidebar-nav-btn active">🎯 Sprites</button>
   <button id="tabNews" class="sidebar-nav-btn">📰 Fortnite News</button>
-  <div class="sidebar-divider"></div>
-  <button id="shareProgressBtn" class="sidebar-share-btn">🔗 Share My Progress</button>
 </nav>
 
 <div class="roast-badge-wrap" id="roastBadgeWrap" style="display:none;">
@@ -1145,6 +909,13 @@
 
 <div class="spotlight-card" id="spotlightCard" style="display:none;"></div>
 
+<h2 class="sprites-page-heading" id="spritesPageHeading" style="display:none;">Sprites Collected</h2>
+
+<div class="sprites-toggle-bar" id="spritesToggleBar" style="display:none;">
+  <button id="toggleCaptured" class="sprites-toggle-btn active">Captured</button>
+  <button id="toggleNew" class="sprites-toggle-btn">New</button>
+</div>
+
 <div class="progress-wrap" id="progressWrap">
   <div id="progressText">0 / 0 collected</div>
   <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
@@ -1162,87 +933,20 @@
 
 <div class="rarity-filters" id="rarityFilters"></div>
 
-<div class="unreleased-note" id="unreleasedNote" style="display:none;">
-  Sprites shown here aren't obtainable yet — showcased for reference only, no progress tracking.
-</div>
-
 <div class="mastered-note" id="masteredNote" style="display:none;">
-  Every released variant, split by mastery status &middot; click a sprite to collect it, click the crown to master it.
+  Every sprite you've collected, with a sticker marking the ones you've mastered &middot; click a sprite to un-collect it, click the crown to toggle mastery.
 </div>
 <div class="mastered-total-counter" id="masteredTotalCounter" style="display:none;"></div>
 
-<div class="friends-note" id="friendsNote" style="display:none;">
-  Track progress of friends &middot; share your link with them, or paste one they sent you below.
-</div>
-<div class="friends-controls" id="friendsControls" style="display:none;">
-  <select id="friendSelect"></select>
-  <button id="removeFriendBtn">Remove Friend</button>
-  <div class="friends-import-manual">
-    <input type="text" id="manualShareLinkInput" placeholder="Paste a friend's share link here...">
-    <button id="manualImportBtn">Add Friend</button>
-  </div>
-</div>
-
-<div class="grid-wrap" id="releasedView"></div>
-<div class="grid-wrap" id="unreleasedView" style="display:none;"></div>
-<div class="grid-wrap" id="masteredView" style="display:none;"></div>
-<div class="grid-wrap" id="friendsView" style="display:none;"></div>
-
-<div class="game-wrap" id="gameView" style="display:none;">
-  <div class="game-header">
-    <div>Score: <span id="gameScore">0</span></div>
-    <div>Best: <span id="gameHighScore">0</span></div>
-  </div>
-  <canvas id="gameCanvas" width="760" height="260"></canvas>
-  <div class="game-hint">Press Space, click, or tap the canvas to jump.</div>
-  <button id="gameStartBtn">▶ Start</button>
-</div>
-
-<div class="powerhour-wrap" id="powerHourView" style="display:none;">
-  <div class="powerhour-note">All times shown in South African Standard Time (SAST, UTC+2). This board updates live — finished events get struck through automatically, no refresh needed.</div>
-  <div class="powerhour-board" id="powerHourBoard"></div>
-  <div class="powerhour-footer-note">Schedule covers Sprite Spree Week (15–20 Aug 2026) through the start of Chapter 7 Season 4 "Override."</div>
+<div class="grid-wrap-outer" id="spritesPageViews" style="display:none;">
+  <div class="grid-wrap" id="masteredView"></div>
+  <div class="grid-wrap" id="releasedView" style="display:none;"></div>
 </div>
 
 <div class="news-wrap" id="newsView" style="display:none;">
   <div class="news-note">Mix of Epic's official announcements and dataminer/leak reporting, refreshed weekly. <strong>LEAK</strong> items are unconfirmed rumors until Epic announces them officially.</div>
   <div class="news-board" id="newsBoard"></div>
 </div>
-</div>
-
-<div class="modal-overlay" id="importModalOverlay" style="display:none;">
-  <div class="modal-box">
-    <h2>Track a Friend's Sprite Collection</h2>
-    <p>You've received a shared sprite progress link! Give this friend a name, and choose how you'd like to track them.</p>
-    <label for="friendNameInput">Friend's name</label>
-    <input type="text" id="friendNameInput" placeholder="e.g. Alex" autocomplete="off">
-    <div class="import-mode-options">
-      <label class="import-mode-option">
-        <input type="radio" name="importMode" value="outstanding" checked>
-        <span><strong>Track outstanding only</strong> — just save what they still need (recommended)</span>
-      </label>
-      <label class="import-mode-option">
-        <input type="radio" name="importMode" value="mirror">
-        <span><strong>Mirror full collection</strong> — save their entire collected/mastered state</span>
-      </label>
-    </div>
-    <div class="modal-actions">
-      <button id="importCancelBtn">Cancel</button>
-      <button id="importConfirmBtn" class="primary">Save Friend</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="shareModalOverlay" style="display:none;">
-  <div class="modal-box">
-    <h2>Share Your Progress</h2>
-    <p>Send this link to a friend so they can track your sprite collection.</p>
-    <a href="#" id="shareLinkAnchor" class="share-link-display" target="_blank" rel="noopener"></a>
-    <div class="modal-actions">
-      <button id="shareCloseBtn">Close</button>
-      <button id="shareCopyBtn" class="primary">Copy Link</button>
-    </div>
-  </div>
 </div>
 
 <div class="modal-overlay" id="nameModalOverlay" style="display:none;">
@@ -1479,14 +1183,6 @@ function saveMastery() {
   localStorage.setItem(MASTERY_KEY, JSON.stringify(mastery));
 }
 
-const FRIENDS_KEY = "fortniteSpriteFriends";
-let friends = JSON.parse(localStorage.getItem(FRIENDS_KEY) || "{}");
-let currentFriendSelection = null;
-
-function saveFriends() {
-  localStorage.setItem(FRIENDS_KEY, JSON.stringify(friends));
-}
-
 const USER_NAME_KEY = "fortniteSpriteUserName";
 let userName = localStorage.getItem(USER_NAME_KEY) || "";
 
@@ -1657,129 +1353,6 @@ function renderSpotlight() {
   container.appendChild(body);
   container.style.display = "";
 }
-
-// Sprite Power Hour schedule for Sprite Spree Week (15-20 Aug 2026), sourced from
-// Epic Games event coverage (theclick.gg, vice.com, gamerant.com) cross-checked on 2026-08-16.
-// Times are stored as fixed UTC instants and rendered in SAST (UTC+2, no DST) below —
-// deliberately NOT read from the visitor's local clock, so the board reads the same in-game time everywhere.
-const POWER_HOUR_EVENTS = [
-  {
-    title: "Mythic Sprite Power Hour",
-    desc: "Boosted spawn rates for Zero Point and Grim Sprites",
-    icons: ["zeropoint_basic", "grim_basic"],
-    startUTC: "2026-08-15T18:00:00Z",
-    endUTC: "2026-08-15T20:00:00Z",
-  },
-  {
-    title: "Mythic Sprite Power Hour",
-    desc: "Boosted spawn rates for Zero Point and Grim Sprites",
-    icons: ["zeropoint_basic", "grim_basic"],
-    startUTC: "2026-08-16T01:00:00Z",
-    endUTC: "2026-08-16T03:00:00Z",
-  },
-  {
-    title: "Galaxy Sprite Hours",
-    desc: "24-hour boosted spawn rate for Galaxy-variant Sprites",
-    icons: ["zeropoint_galaxy"],
-    startUTC: "2026-08-16T13:00:00Z",
-    endUTC: "2026-08-17T13:00:00Z",
-  },
-  {
-    title: "Holofoil Sprite Hours",
-    desc: "24-hour boosted spawn rate for Holofoil-variant Sprites",
-    icons: ["zeropoint_holofoil"],
-    startUTC: "2026-08-17T13:00:00Z",
-    endUTC: "2026-08-18T13:00:00Z",
-  },
-  {
-    title: "Cube Sprite Hours",
-    desc: "24-hour boosted spawn rate for Cube-variant Sprites",
-    icons: ["zeropoint_rift"],
-    startUTC: "2026-08-18T13:00:00Z",
-    endUTC: "2026-08-19T13:00:00Z",
-  },
-  {
-    title: "Gem Sprite Hours",
-    desc: "24-hour boosted spawn rate for Gem-variant Sprites — final Power Hour before Season 4 begins",
-    icons: ["zeropoint_gem"],
-    startUTC: "2026-08-19T13:00:00Z",
-    endUTC: "2026-08-20T13:00:00Z",
-  },
-];
-
-const SAST_OFFSET_MS = 2 * 60 * 60 * 1000; // UTC+2, South Africa has no DST
-const SAST_DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const SAST_MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-function formatSAST(iso) {
-  const shifted = new Date(new Date(iso).getTime() + SAST_OFFSET_MS);
-  const day = SAST_DAY_NAMES[shifted.getUTCDay()];
-  const date = shifted.getUTCDate();
-  const month = SAST_MONTH_NAMES[shifted.getUTCMonth()];
-  let hours = shifted.getUTCHours();
-  const minutes = shifted.getUTCMinutes().toString().padStart(2, "0");
-  const ampm = hours >= 12 ? "PM" : "AM";
-  hours = hours % 12;
-  if (hours === 0) hours = 12;
-  return `${day}, ${date} ${month} · ${hours}:${minutes} ${ampm} SAST`;
-}
-
-function renderPowerHour() {
-  const board = document.getElementById("powerHourBoard");
-  if (!board) return;
-  const now = Date.now();
-  board.innerHTML = "";
-
-  POWER_HOUR_EVENTS.forEach(ev => {
-    const start = new Date(ev.startUTC).getTime();
-    const end = new Date(ev.endUTC).getTime();
-    const isDone = now >= end;
-    const isLive = !isDone && now >= start;
-
-    const card = document.createElement("div");
-    card.className = "powerhour-event" + (isDone ? " is-done" : "") + (isLive ? " is-live" : "");
-
-    const icons = document.createElement("div");
-    icons.className = "powerhour-icons";
-    ev.icons.forEach(id => {
-      const img = document.createElement("img");
-      img.alt = id;
-      wireImgFallback(img, id);
-      img.src = IMG_BASE + id + ".png";
-      icons.appendChild(img);
-    });
-    card.appendChild(icons);
-
-    const body = document.createElement("div");
-    body.className = "powerhour-body";
-
-    const title = document.createElement("div");
-    title.className = "powerhour-title";
-    title.textContent = ev.title;
-    body.appendChild(title);
-
-    const time = document.createElement("div");
-    time.className = "powerhour-time";
-    time.textContent = `${formatSAST(ev.startUTC)} – ${formatSAST(ev.endUTC)}`;
-    body.appendChild(time);
-
-    const desc = document.createElement("div");
-    desc.className = "powerhour-desc";
-    desc.textContent = ev.desc;
-    body.appendChild(desc);
-
-    card.appendChild(body);
-
-    const status = document.createElement("div");
-    status.className = "powerhour-status " + (isDone ? "done" : isLive ? "live" : "upcoming");
-    status.textContent = isDone ? "✅ Done" : isLive ? "🔴 Live Now" : "⏳ Upcoming";
-    card.appendChild(status);
-
-    board.appendChild(card);
-  });
-}
-
-setInterval(renderPowerHour, 60000);
 
 // Fortnite News feed — mix of official Epic announcements and dataminer/leak reporting.
 // Populated 2026-08-16 from Vice, Gamerant, TalkEsport and TechTimes coverage; refreshed weekly
@@ -2119,41 +1692,6 @@ function createVariantChip(sprite) {
   return chip;
 }
 
-function createReadOnlyChip(sprite, collected, isMastered) {
-  const chip = document.createElement("div");
-  const colorClass = sprite.variant === "basic" ? sprite.rarity.toLowerCase() : "special";
-  chip.className = "variant-chip readonly " + colorClass + (sprite.variant === "holofoil" ? " holofoil" : "");
-  if (!collected) chip.classList.add("locked");
-  if (collected && isMastered) chip.classList.add("mastered");
-
-  const img = document.createElement("img");
-  img.alt = sprite.name;
-  img.loading = "lazy";
-  wireImgFallback(img, sprite.id);
-  img.src = IMG_BASE + sprite.id + ".png";
-
-  const label = document.createElement("span");
-  label.className = "variant-label";
-  label.textContent = sprite.variant === "basic" ? sprite.rarity : variantLabels[sprite.variant];
-
-  chip.appendChild(img);
-  chip.appendChild(label);
-
-  if (!collected) {
-    const lockIcon = document.createElement("span");
-    lockIcon.className = "lock-icon";
-    lockIcon.textContent = "\u{1F512}";
-    chip.appendChild(lockIcon);
-  } else {
-    const checkBadge = document.createElement("span");
-    checkBadge.className = "check-badge";
-    checkBadge.textContent = "✓";
-    chip.appendChild(checkBadge);
-  }
-
-  return chip;
-}
-
 function buildReleasedView() {
   const container = document.getElementById("releasedView");
   container.innerHTML = "";
@@ -2223,7 +1761,7 @@ function buildMasteredView() {
     const count = document.createElement("div");
     count.className = "family-count";
     const masteredCount = collectedItems.filter(s => !!mastery[s.id]).length;
-    count.textContent = `${masteredCount} / ${collectedItems.length} mastered`;
+    count.textContent = `${collectedItems.length} / ${group.items.length} collected`;
     totalMastered += masteredCount;
 
     header.appendChild(icon);
@@ -2231,303 +1769,29 @@ function buildMasteredView() {
     header.appendChild(count);
     card.appendChild(header);
 
-    const split = document.createElement("div");
-    split.className = "mastered-split";
-
-    const notMasteredCol = document.createElement("div");
-    notMasteredCol.className = "mastered-col not-mastered";
-    notMasteredCol.innerHTML = "<h3>Not Mastered</h3>";
-    const notMasteredStrip = document.createElement("div");
-    notMasteredStrip.className = "variant-strip";
-    notMasteredCol.appendChild(notMasteredStrip);
-
-    const masteredCol = document.createElement("div");
-    masteredCol.className = "mastered-col is-mastered";
-    masteredCol.innerHTML = "<h3>Mastered</h3>";
-    const masteredStrip = document.createElement("div");
-    masteredStrip.className = "variant-strip";
-    masteredCol.appendChild(masteredStrip);
-
-    collectedItems.forEach(sprite => {
-      const chip = createVariantChip(sprite);
-      const isMastered = !!mastery[sprite.id];
-      (isMastered ? masteredStrip : notMasteredStrip).appendChild(chip);
-    });
-
-    split.appendChild(notMasteredCol);
-    split.appendChild(masteredCol);
-    card.appendChild(split);
-    container.appendChild(card);
-  });
-
-  const totalCollected = sprites.filter(s => !!state[s.id]).length;
-  const counterEl = document.getElementById("masteredTotalCounter");
-  counterEl.innerHTML = `${totalMastered} Mastered <span class="counter-sub">/ ${totalCollected} Collected</span>`;
-}
-
-function bitsToCompact(boolArray) {
-  const byteCount = Math.ceil(boolArray.length / 8);
-  const bytes = new Uint8Array(byteCount);
-  boolArray.forEach((on, i) => {
-    if (on) bytes[i >> 3] |= (1 << (i % 8));
-  });
-  let binary = "";
-  bytes.forEach(b => binary += String.fromCharCode(b));
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
-function compactToBits(str, length) {
-  if (!str) return new Array(length).fill(false);
-  let b64 = str.replace(/-/g, "+").replace(/_/g, "/");
-  while (b64.length % 4) b64 += "=";
-  let binary;
-  try {
-    binary = atob(b64);
-  } catch (e) {
-    return new Array(length).fill(false);
-  }
-  const bits = [];
-  for (let i = 0; i < length; i++) {
-    const byte = binary.charCodeAt(i >> 3) || 0;
-    bits.push(!!(byte & (1 << (i % 8))));
-  }
-  return bits;
-}
-
-function buildShareUrl() {
-  const collectedBits = sprites.map(s => !!state[s.id]);
-  const masteredBits = sprites.map(s => !!(state[s.id] && mastery[s.id]));
-  const params = new URLSearchParams();
-  params.set("fs", "1");
-  params.set("c", bitsToCompact(collectedBits));
-  params.set("m", bitsToCompact(masteredBits));
-  return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
-}
-
-function parseShareParams(search) {
-  const params = new URLSearchParams(search);
-  if (params.get("fs") !== "1") return null;
-  const cBits = compactToBits(params.get("c") || "", sprites.length);
-  const mBits = compactToBits(params.get("m") || "", sprites.length);
-  return {
-    collectedIds: sprites.filter((s, i) => cBits[i]).map(s => s.id),
-    masteredIds: sprites.filter((s, i) => mBits[i]).map(s => s.id),
-  };
-}
-
-let pendingImport = null;
-
-function showImportModal(shareData) {
-  pendingImport = shareData;
-  document.getElementById("friendNameInput").value = "";
-  document.querySelector('input[name="importMode"][value="outstanding"]').checked = true;
-  document.getElementById("importModalOverlay").style.display = "flex";
-}
-
-function hideImportModal() {
-  pendingImport = null;
-  document.getElementById("importModalOverlay").style.display = "none";
-}
-
-function confirmImport() {
-  if (!pendingImport) return;
-  const name = document.getElementById("friendNameInput").value.trim();
-  if (!name) {
-    alert("Please enter a name for this friend.");
-    return;
-  }
-  const mode = document.querySelector('input[name="importMode"]:checked').value;
-  const entry = { mode, savedAt: new Date().toISOString() };
-  if (mode === "mirror") {
-    entry.collectedIds = pendingImport.collectedIds;
-    entry.masteredIds = pendingImport.masteredIds;
-  } else {
-    entry.outstandingIds = sprites.map(s => s.id).filter(id => !pendingImport.collectedIds.includes(id));
-  }
-  friends[name] = entry;
-  saveFriends();
-  hideImportModal();
-
-  const cleanUrl = window.location.origin + window.location.pathname;
-  window.history.replaceState({}, document.title, cleanUrl);
-
-  currentFriendSelection = name;
-  populateFriendSelector();
-  buildFriendsView();
-  activateTab(tabFriends);
-}
-
-function populateFriendSelector() {
-  const select = document.getElementById("friendSelect");
-  const names = Object.keys(friends);
-  select.innerHTML = "";
-  names.forEach(name => {
-    const opt = document.createElement("option");
-    opt.value = name;
-    opt.textContent = name;
-    select.appendChild(opt);
-  });
-  if (!names.length) return;
-  if (!currentFriendSelection || !friends[currentFriendSelection]) {
-    currentFriendSelection = names[0];
-  }
-  select.value = currentFriendSelection;
-}
-
-function buildFriendsView() {
-  const container = document.getElementById("friendsView");
-  container.innerHTML = "";
-  const names = Object.keys(friends);
-  const removeBtn = document.getElementById("removeFriendBtn");
-  const select = document.getElementById("friendSelect");
-
-  if (!names.length) {
-    select.style.display = "none";
-    removeBtn.style.display = "none";
-    container.innerHTML = `<div class="friends-empty">No friends added yet. Share your progress link with a friend using the button above, or paste a link they sent you below.</div>`;
-    return;
-  }
-  select.style.display = "";
-  removeBtn.style.display = "";
-
-  if (!currentFriendSelection || !friends[currentFriendSelection]) {
-    currentFriendSelection = names[0];
-  }
-  const data = friends[currentFriendSelection];
-  const savedDate = new Date(data.savedAt);
-  const savedLabel = isNaN(savedDate) ? "" : savedDate.toLocaleString();
-
-  const meta = document.createElement("div");
-  meta.className = "friends-summary";
-  if (data.mode === "mirror") {
-    const gotCount = sprites.filter(s => data.collectedIds.includes(s.id)).length;
-    meta.textContent = `${currentFriendSelection}: mirroring full collection — ${gotCount} / ${sprites.length} collected (synced ${savedLabel})`;
-  } else {
-    const missingCount = data.outstandingIds.length;
-    meta.textContent = `${currentFriendSelection} still needs ${missingCount} sprite${missingCount === 1 ? "" : "s"} (synced ${savedLabel})`;
-  }
-  container.appendChild(meta);
-
-  if (data.mode === "mirror") {
-    groupByFamily(sprites).forEach(group => {
-      const card = document.createElement("div");
-      card.className = "family-card";
-
-      const header = document.createElement("div");
-      header.className = "family-header";
-      const icon = document.createElement("div");
-      icon.className = "family-icon";
-      const basicItem = group.items.find(i => i.variant === "basic") || group.items[0];
-      icon.style.backgroundImage = `url(${IMG_BASE}${basicItem.id}.png)`;
-      const title = document.createElement("div");
-      title.className = "family-title";
-      title.textContent = group.title;
-      const count = document.createElement("div");
-      count.className = "family-count";
-      const got = group.items.filter(s => data.collectedIds.includes(s.id)).length;
-      count.textContent = `${got} / ${group.items.length}`;
-      header.appendChild(icon);
-      header.appendChild(title);
-      header.appendChild(count);
-      card.appendChild(header);
-
-      const strip = document.createElement("div");
-      strip.className = "variant-strip";
-      group.items.forEach(sprite => {
-        const collected = data.collectedIds.includes(sprite.id);
-        const isMastered = collected && data.masteredIds.includes(sprite.id);
-        strip.appendChild(createReadOnlyChip(sprite, collected, isMastered));
-      });
-      card.appendChild(strip);
-      container.appendChild(card);
-    });
-  } else {
-    groupByFamily(sprites).forEach(group => {
-      const missing = group.items.filter(s => data.outstandingIds.includes(s.id));
-      if (!missing.length) return;
-
-      const card = document.createElement("div");
-      card.className = "family-card";
-
-      const header = document.createElement("div");
-      header.className = "family-header";
-      const icon = document.createElement("div");
-      icon.className = "family-icon";
-      const basicItem = group.items.find(i => i.variant === "basic") || group.items[0];
-      icon.style.backgroundImage = `url(${IMG_BASE}${basicItem.id}.png)`;
-      const title = document.createElement("div");
-      title.className = "family-title";
-      title.textContent = group.title;
-      const count = document.createElement("div");
-      count.className = "family-count";
-      count.textContent = `${missing.length} still needed`;
-      header.appendChild(icon);
-      header.appendChild(title);
-      header.appendChild(count);
-      card.appendChild(header);
-
-      const strip = document.createElement("div");
-      strip.className = "variant-strip";
-      missing.forEach(sprite => strip.appendChild(createReadOnlyChip(sprite, false, false)));
-      card.appendChild(strip);
-      container.appendChild(card);
-    });
-  }
-}
-
-function buildUnreleasedView() {
-  const container = document.getElementById("unreleasedView");
-  container.innerHTML = "";
-  groupByFamily(unreleasedSprites).forEach(group => {
-    const card = document.createElement("div");
-    card.className = "family-card";
-
-    const header = document.createElement("div");
-    header.className = "family-header";
-
-    const icon = document.createElement("div");
-    icon.className = "family-icon";
-    const basicItem = group.items.find(i => i.variant === "basic") || group.items[0];
-    icon.style.backgroundImage = `url(${IMG_BASE}${basicItem.id}.png)`;
-
-    const title = document.createElement("div");
-    title.className = "family-title";
-    title.textContent = group.title;
-
-    header.appendChild(icon);
-    header.appendChild(title);
-    card.appendChild(header);
-
     const strip = document.createElement("div");
     strip.className = "variant-strip";
 
-    group.items.forEach(sprite => {
-      const chip = document.createElement("div");
-      chip.className = "variant-chip unreleased";
-
-      const img = document.createElement("img");
-      img.alt = sprite.name;
-      img.loading = "lazy";
-      wireImgFallback(img, sprite.id);
-      img.src = IMG_BASE + sprite.id + ".png";
-
-      const label = document.createElement("span");
-      label.className = "variant-label";
-      label.textContent = sprite.variant === "basic" ? sprite.rarity : variantLabels[sprite.variant];
-
-      const badge = document.createElement("span");
-      badge.className = "coming-soon-badge";
-      badge.textContent = "SOON";
-
-      chip.appendChild(img);
-      chip.appendChild(label);
-      chip.appendChild(badge);
-      strip.appendChild(chip);
+    collectedItems.forEach(sprite => {
+      const item = document.createElement("div");
+      item.className = "captured-item";
+      item.appendChild(createVariantChip(sprite));
+      if (mastery[sprite.id]) {
+        const sticker = document.createElement("div");
+        sticker.className = "mastered-sticker";
+        sticker.textContent = "🏆 Mastered";
+        item.appendChild(sticker);
+      }
+      strip.appendChild(item);
     });
 
     card.appendChild(strip);
     container.appendChild(card);
   });
+
+  const totalCollected = sprites.filter(s => !!state[s.id]).length;
+  const counterEl = document.getElementById("masteredTotalCounter");
+  counterEl.innerHTML = `${totalCollected} Sprites Collected <span class="counter-sub">/ ${totalMastered} Mastered</span>`;
 }
 
 function updateProgress() {
@@ -2655,43 +1919,48 @@ document.getElementById("resetAll").addEventListener("click", () => {
   applyFilters();
 });
 
-const tabReleased = document.getElementById("tabReleased");
-const tabUnreleased = document.getElementById("tabUnreleased");
-const tabMastered = document.getElementById("tabMastered");
-const tabFriends = document.getElementById("tabFriends");
-const tabGame = document.getElementById("tabGame");
-const tabPowerHour = document.getElementById("tabPowerHour");
+const tabSprites = document.getElementById("tabSprites");
 const tabNews = document.getElementById("tabNews");
+const spritesPageViews = document.getElementById("spritesPageViews");
 const releasedView = document.getElementById("releasedView");
-const unreleasedView = document.getElementById("unreleasedView");
 const masteredView = document.getElementById("masteredView");
-const friendsView = document.getElementById("friendsView");
-const gameView = document.getElementById("gameView");
-const powerHourView = document.getElementById("powerHourView");
 const newsView = document.getElementById("newsView");
 const progressWrap = document.getElementById("progressWrap");
 const controls = document.getElementById("controls");
 const rarityFilters = document.getElementById("rarityFilters");
-const unreleasedNote = document.getElementById("unreleasedNote");
 const masteredNote = document.getElementById("masteredNote");
 const masteredTotalCounter = document.getElementById("masteredTotalCounter");
-const friendsNote = document.getElementById("friendsNote");
-const friendsControls = document.getElementById("friendsControls");
 const achievementsRow = document.getElementById("achievementsRow");
 const spotlightCard = document.getElementById("spotlightCard");
+const spritesPageHeading = document.getElementById("spritesPageHeading");
+const spritesToggleBar = document.getElementById("spritesToggleBar");
+const toggleCaptured = document.getElementById("toggleCaptured");
+const toggleNew = document.getElementById("toggleNew");
 
-const allTabs = [tabReleased, tabUnreleased, tabMastered, tabFriends, tabGame, tabPowerHour, tabNews];
-const allViews = [releasedView, unreleasedView, masteredView, friendsView, gameView, powerHourView, newsView];
+const allTabs = [tabSprites, tabNews];
+const allViews = [spritesPageViews, newsView];
 
 const tabConfig = {
-  [tabReleased.id]: { tab: tabReleased, view: releasedView, progressWrap: true, controls: true, rarityFilters: true, achievementsRow: true, spotlightCard: true },
-  [tabUnreleased.id]: { tab: tabUnreleased, view: unreleasedView, unreleasedNote: true },
-  [tabMastered.id]: { tab: tabMastered, view: masteredView, masteredNote: true, masteredTotalCounter: true },
-  [tabFriends.id]: { tab: tabFriends, view: friendsView, friendsNote: true, friendsControls: true },
-  [tabGame.id]: { tab: tabGame, view: gameView },
-  [tabPowerHour.id]: { tab: tabPowerHour, view: powerHourView, powerHour: true },
+  [tabSprites.id]: { tab: tabSprites, view: spritesPageViews, progressWrap: true, achievementsRow: true, spotlightCard: true, sprites: true },
   [tabNews.id]: { tab: tabNews, view: newsView, news: true },
 };
+
+let spritesSubTab = "captured";
+
+function setSpritesSubTab(sub) {
+  spritesSubTab = sub;
+  toggleCaptured.classList.toggle("active", sub === "captured");
+  toggleNew.classList.toggle("active", sub === "new");
+  masteredView.style.display = sub === "captured" ? "" : "none";
+  releasedView.style.display = sub === "new" ? "" : "none";
+  masteredNote.style.display = sub === "captured" ? "" : "none";
+  masteredTotalCounter.style.display = sub === "captured" ? "" : "none";
+  controls.style.display = sub === "new" ? "" : "none";
+  rarityFilters.style.display = sub === "new" ? "" : "none";
+}
+
+toggleCaptured.addEventListener("click", () => setSpritesSubTab("captured"));
+toggleNew.addEventListener("click", () => setSpritesSubTab("new"));
 
 function activateTab(tabEl) {
   const cfg = tabConfig[tabEl.id];
@@ -2700,16 +1969,18 @@ function activateTab(tabEl) {
   allViews.forEach(v => v.style.display = "none");
   cfg.view.style.display = "";
   progressWrap.style.display = cfg.progressWrap ? "" : "none";
-  controls.style.display = cfg.controls ? "" : "none";
-  rarityFilters.style.display = cfg.rarityFilters ? "" : "none";
-  unreleasedNote.style.display = cfg.unreleasedNote ? "" : "none";
-  masteredNote.style.display = cfg.masteredNote ? "" : "none";
-  masteredTotalCounter.style.display = cfg.masteredTotalCounter ? "" : "none";
-  friendsNote.style.display = cfg.friendsNote ? "" : "none";
-  friendsControls.style.display = cfg.friendsControls ? "" : "none";
+  spritesPageHeading.style.display = cfg.sprites ? "" : "none";
+  spritesToggleBar.style.display = cfg.sprites ? "" : "none";
+  if (cfg.sprites) {
+    setSpritesSubTab(spritesSubTab);
+  } else {
+    controls.style.display = "none";
+    rarityFilters.style.display = "none";
+    masteredNote.style.display = "none";
+    masteredTotalCounter.style.display = "none";
+  }
   if (cfg.achievementsRow) { renderAchievements(); } else { achievementsRow.style.display = "none"; }
   if (cfg.spotlightCard) { renderSpotlight(); } else { spotlightCard.style.display = "none"; }
-  if (cfg.powerHour) { renderPowerHour(); }
   if (cfg.news) { renderNews(); }
 }
 
@@ -2778,223 +2049,16 @@ function buildSpriteRain() {
   }
 }
 
-document.getElementById("shareProgressBtn").addEventListener("click", () => {
-  const url = buildShareUrl();
-  const anchor = document.getElementById("shareLinkAnchor");
-  anchor.href = url;
-  anchor.textContent = url;
-  document.getElementById("shareModalOverlay").style.display = "flex";
-});
-
-document.getElementById("shareCloseBtn").addEventListener("click", () => {
-  document.getElementById("shareModalOverlay").style.display = "none";
-});
-
-document.getElementById("shareCopyBtn").addEventListener("click", async () => {
-  const url = document.getElementById("shareLinkAnchor").href;
-  const btn = document.getElementById("shareCopyBtn");
-  try {
-    await navigator.clipboard.writeText(url);
-    const original = btn.textContent;
-    btn.textContent = "Copied!";
-    setTimeout(() => { btn.textContent = original; }, 1500);
-  } catch (e) {
-    window.prompt("Copy this link to share your progress:", url);
-  }
-});
-
-document.getElementById("importCancelBtn").addEventListener("click", () => {
-  hideImportModal();
-  const cleanUrl = window.location.origin + window.location.pathname;
-  window.history.replaceState({}, document.title, cleanUrl);
-});
-
-document.getElementById("importConfirmBtn").addEventListener("click", confirmImport);
-
-document.getElementById("friendSelect").addEventListener("change", (e) => {
-  currentFriendSelection = e.target.value;
-  buildFriendsView();
-});
-
-document.getElementById("removeFriendBtn").addEventListener("click", () => {
-  if (!currentFriendSelection || !friends[currentFriendSelection]) return;
-  if (!confirm(`Remove ${currentFriendSelection} from your friends list?`)) return;
-  delete friends[currentFriendSelection];
-  saveFriends();
-  currentFriendSelection = null;
-  populateFriendSelector();
-  buildFriendsView();
-});
-
-document.getElementById("manualImportBtn").addEventListener("click", () => {
-  const raw = document.getElementById("manualShareLinkInput").value.trim();
-  if (!raw) return;
-  let search = raw;
-  try {
-    const url = new URL(raw);
-    search = url.search;
-  } catch (e) {
-    if (!raw.includes("friendshare")) {
-      alert("That doesn't look like a valid share link.");
-      return;
-    }
-    search = raw.includes("?") ? raw.slice(raw.indexOf("?")) : "?" + raw;
-  }
-  const shareData = parseShareParams(search);
-  if (!shareData) {
-    alert("That doesn't look like a valid share link.");
-    return;
-  }
-  document.getElementById("manualShareLinkInput").value = "";
-  showImportModal(shareData);
-});
-
-const RUNNER_HIGH_SCORE_KEY = "fortniteSpriteRunnerHighScore";
-let runnerHighScore = parseInt(localStorage.getItem(RUNNER_HIGH_SCORE_KEY) || "0", 10);
-
-function initSpriteRunner() {
-  const canvas = document.getElementById("gameCanvas");
-  const ctx = canvas.getContext("2d");
-  const W = canvas.width, H = canvas.height;
-  const groundY = H - 30;
-  const gravity = 0.6;
-  const jumpVelocity = -11;
-
-  const runnerSpriteImg = new Image();
-  runnerSpriteImg.src = IMG_BASE + "water_basic.png";
-
-  let player, obstacles, score, speed, lastSpawn, running, animId;
-
-  document.getElementById("gameHighScore").textContent = runnerHighScore;
-
-  function resetGame() {
-    player = { x: 50, y: groundY - 34, w: 34, h: 34, vy: 0, onGround: true };
-    obstacles = [];
-    score = 0;
-    speed = 5;
-    lastSpawn = 0;
-    running = true;
-    document.getElementById("gameScore").textContent = "0";
-  }
-
-  function spawnObstacle() {
-    const h = 24 + Math.random() * 20;
-    obstacles.push({ x: W, y: groundY - h, w: 20, h: h });
-  }
-
-  function draw() {
-    ctx.clearRect(0, 0, W, H);
-    ctx.strokeStyle = "#444";
-    ctx.beginPath();
-    ctx.moveTo(0, groundY);
-    ctx.lineTo(W, groundY);
-    ctx.stroke();
-    if (runnerSpriteImg.complete && runnerSpriteImg.naturalWidth) {
-      ctx.drawImage(runnerSpriteImg, player.x, player.y, player.w, player.h);
-    } else {
-      ctx.fillStyle = "#4a90d9";
-      ctx.fillRect(player.x, player.y, player.w, player.h);
-    }
-    ctx.fillStyle = "#d9534f";
-    obstacles.forEach(o => ctx.fillRect(o.x, o.y, o.w, o.h));
-  }
-
-  function endGame() {
-    running = false;
-    cancelAnimationFrame(animId);
-    const finalScore = Math.floor(score / 5);
-    let newBest = false;
-    if (finalScore > runnerHighScore) {
-      runnerHighScore = finalScore;
-      localStorage.setItem(RUNNER_HIGH_SCORE_KEY, String(runnerHighScore));
-      newBest = true;
-    }
-    document.getElementById("gameHighScore").textContent = runnerHighScore;
-    ctx.fillStyle = "rgba(0,0,0,0.65)";
-    ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 22px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText(newBest ? `New High Score! ${finalScore}` : `Game Over — Score: ${finalScore}`, W / 2, H / 2 - 10);
-    ctx.font = "14px sans-serif";
-    ctx.fillText("Press Space, click, or tap to play again", W / 2, H / 2 + 20);
-  }
-
-  function update() {
-    if (!running) return;
-    player.vy += gravity;
-    player.y += player.vy;
-    if (player.y >= groundY - player.h) {
-      player.y = groundY - player.h;
-      player.vy = 0;
-      player.onGround = true;
-    }
-
-    speed += 0.002;
-    score += 1;
-    document.getElementById("gameScore").textContent = Math.floor(score / 5);
-
-    lastSpawn++;
-    const spawnThreshold = Math.max(45, 90 - Math.floor(score / 200));
-    if (lastSpawn > spawnThreshold) {
-      spawnObstacle();
-      lastSpawn = 0;
-    }
-
-    obstacles.forEach(o => o.x -= speed);
-    obstacles = obstacles.filter(o => o.x + o.w > 0);
-
-    for (const o of obstacles) {
-      if (player.x < o.x + o.w && player.x + player.w > o.x && player.y < o.y + o.h && player.y + player.h > o.y) {
-        endGame();
-        return;
-      }
-    }
-
-    draw();
-    animId = requestAnimationFrame(update);
-  }
-
-  function startGame() {
-    resetGame();
-    animId = requestAnimationFrame(update);
-  }
-
-  function jump() {
-    if (!running) {
-      startGame();
-      return;
-    }
-    if (player.onGround) {
-      player.vy = jumpVelocity;
-      player.onGround = false;
-    }
-  }
-
-  document.getElementById("gameStartBtn").addEventListener("click", startGame);
-  canvas.addEventListener("click", jump);
-  document.addEventListener("keydown", (e) => {
-    if (e.code === "Space" && tabGame.classList.contains("active")) {
-      e.preventDefault();
-      jump();
-    }
-  });
-}
-
 buildReleasedView();
-buildUnreleasedView();
 buildMasteredView();
 buildRarityFilters();
 buildSpriteRain();
 buildRoastOrbit();
-populateFriendSelector();
-buildFriendsView();
-initSpriteRunner();
 updateProgress();
 updateFilterCounts();
 applyFilters();
-renderPowerHour();
 renderNews();
+activateTab(tabSprites);
 
 let isEditingName = false;
 
@@ -3022,10 +2086,6 @@ function proceedAfterName() {
   renderDailyRoast();
   renderAchievements();
   renderSpotlight();
-  const incomingShare = parseShareParams(window.location.search);
-  if (incomingShare) {
-    showImportModal(incomingShare);
-  }
 }
 
 function confirmUserName() {
